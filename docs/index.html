@@ -1,0 +1,1287 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>데이터 과학 클래스룸 게임 · 2단원</title>
+<meta name="description" content="고등학교 데이터 과학 2단원(데이터 준비와 분석)을 퀴즈와 단계별 시뮬레이션으로 복습하는 학습용 웹앱">
+<style>
+  :root{
+    --bg:#f4f6fb;
+    --surface:#ffffff;
+    --surface-2:#eef1f8;
+    --text:#1c2333;
+    --text-dim:#5b6478;
+    --border:#dde2ee;
+    --accent:#4f5cff;
+    --accent-2:#7c3aed;
+    --good:#16a34a;
+    --bad:#dc2626;
+    --c-blue:#2563eb;
+    --c-orange:#d97706;
+    --c-green:#16a34a;
+    --c-purple:#7c3aed;
+    --shadow: 0 10px 30px rgba(30,40,80,.08);
+    --radius: 18px;
+    --font: "Pretendard","Apple SD Gothic Neo","Malgun Gothic",-apple-system,BlinkMacSystemFont,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#11131c; --surface:#1a1e2b; --surface-2:#20263a; --text:#eef0f8; --text-dim:#9aa2ba;
+      --border:#2b3247; --accent:#7c86ff; --accent-2:#a78bfa; --good:#4ade80; --bad:#f87171;
+      --c-blue:#60a5fa; --c-orange:#fbbf24; --c-green:#4ade80; --c-purple:#c4b5fd;
+      --shadow: 0 10px 30px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#11131c; --surface:#1a1e2b; --surface-2:#20263a; --text:#eef0f8; --text-dim:#9aa2ba;
+    --border:#2b3247; --accent:#7c86ff; --accent-2:#a78bfa; --good:#4ade80; --bad:#f87171;
+    --c-blue:#60a5fa; --c-orange:#fbbf24; --c-green:#4ade80; --c-purple:#c4b5fd;
+    --shadow: 0 10px 30px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:20px 16px 60px;}
+  a{color:inherit;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 2px 18px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem;cursor:pointer;}
+  .brand .logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:var(--shadow);}
+  .brand small{display:block;font-weight:500;color:var(--text-dim);font-size:.72rem;margin-top:1px;}
+  .iconbtn{border:1px solid var(--border);background:var(--surface);color:var(--text);width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:transform .15s ease, background .15s ease;}
+  .iconbtn:hover{transform:translateY(-1px);background:var(--surface-2);}
+  .iconbtn:active{transform:translateY(0);}
+
+  .screen{display:none;}
+  .screen.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .hero{background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, var(--surface)), var(--surface));border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:22px;box-shadow:var(--shadow);}
+  .hero h1{margin:0 0 8px;font-size:1.45rem;line-height:1.35;}
+  .hero p{margin:0;color:var(--text-dim);font-size:.92rem;line-height:1.6;}
+  .hero .tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{font-size:.72rem;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--text-dim);border:1px solid var(--border);}
+
+  details.info{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:2px 16px;margin-bottom:22px;}
+  details.info summary{cursor:pointer;padding:12px 0;font-weight:700;font-size:.9rem;list-style:none;display:flex;align-items:center;gap:8px;}
+  details.info summary::-webkit-details-marker{display:none;}
+  details.info summary::before{content:"▸";transition:transform .15s;color:var(--accent);}
+  details.info[open] summary::before{transform:rotate(90deg);}
+  details.info .body{padding:0 0 14px;color:var(--text-dim);font-size:.85rem;line-height:1.7;}
+  details.info .body ul{margin:6px 0;padding-left:18px;}
+
+  .section-title{font-size:.98rem;font-weight:800;margin:26px 4px 12px;display:flex;align-items:center;gap:8px;}
+  .section-title .n{font-size:.7rem;font-weight:700;color:var(--text-dim);background:var(--surface-2);border:1px solid var(--border);padding:2px 9px;border-radius:999px;}
+  .section-sub{font-size:.8rem;color:var(--text-dim);margin:-6px 4px 14px;line-height:1.6;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:560px){ .grid{grid-template-columns:1fr;} }
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;box-shadow:var(--shadow);transition:transform .15s ease, border-color .15s ease;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;}
+  .card:hover{transform:translateY(-3px);border-color:var(--accent);}
+  .card .top{display:flex;align-items:center;gap:12px;}
+  .card .icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:var(--surface-2);flex:none;}
+  .card h3{margin:0;font-size:1.02rem;}
+  .card .ref{font-size:.72rem;color:var(--text-dim);}
+  .card .desc{font-size:.82rem;color:var(--text-dim);line-height:1.55;flex:1;}
+  .card .meta{display:flex;align-items:center;justify-content:space-between;font-size:.76rem;color:var(--text-dim);padding-top:8px;border-top:1px dashed var(--border);}
+  .card .best{font-weight:700;color:var(--accent);}
+  .card .done{position:absolute;top:12px;right:12px;font-size:.68rem;font-weight:700;color:var(--good);background:color-mix(in srgb, var(--good) 16%, transparent);padding:3px 8px;border-radius:999px;}
+
+  .gamebar{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .backbtn{border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;padding:8px 12px;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:6px;flex:none;}
+  .backbtn:hover{background:var(--surface-2);}
+  .progress-outer{flex:1;height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--border);}
+  .progress-inner{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .3s ease;}
+  .stats{display:flex;gap:10px;flex:none;font-size:.78rem;color:var(--text-dim);}
+  .stats b{color:var(--text);}
+
+  .question-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow);text-align:center;margin-bottom:18px;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+  .question-card .qlabel{font-size:.74rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;}
+  .question-card .qtext{font-size:1.1rem;font-weight:600;line-height:1.55;}
+
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media (max-width:520px){ .options{grid-template-columns:1fr;} }
+  .opt{border:2px solid var(--border);background:var(--surface);color:var(--text);border-radius:14px;padding:16px 14px;font-size:.93rem;font-weight:700;cursor:pointer;text-align:center;transition:transform .12s ease, border-color .12s ease, background .12s ease;}
+  .opt:hover{transform:translateY(-2px);}
+  .opt:disabled{cursor:default;}
+  .opt.correct{border-color:var(--good);background:color-mix(in srgb, var(--good) 16%, var(--surface));color:var(--good);}
+  .opt.wrong{border-color:var(--bad);background:color-mix(in srgb, var(--bad) 14%, var(--surface));color:var(--bad);animation:shake .3s ease;}
+  .opt.dim{opacity:.45;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+  .feedback{margin-top:16px;border-radius:14px;padding:14px 16px;font-size:.85rem;line-height:1.6;display:none;border:1px solid var(--border);background:var(--surface-2);}
+  .feedback.show{display:block;animation:fadein .2s ease;}
+  .feedback .head{font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+  .feedback.correct .head{color:var(--good);}
+  .feedback.wrong .head{color:var(--bad);}
+
+  .nextrow{display:flex;justify-content:flex-end;margin-top:14px;}
+  .btn{background:var(--accent);color:#fff;border:none;padding:11px 20px;border-radius:12px;font-weight:700;font-size:.88rem;cursor:pointer;transition:filter .12s ease, transform .12s ease;}
+  .btn:hover{filter:brightness(1.08);transform:translateY(-1px);}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
+  .btn.sm{padding:8px 14px;font-size:.8rem;}
+  .btn:disabled{opacity:.45;cursor:default;transform:none;}
+
+  .hint-toggle{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--accent);cursor:pointer;margin-bottom:14px;background:none;border:none;padding:0;}
+  .hintbox{display:none;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:16px;font-size:.8rem;line-height:1.7;color:var(--text-dim);}
+  .hintbox.show{display:block;}
+  .hintbox ol{margin:4px 0 0;padding-left:18px;}
+
+  .result-hero{text-align:center;padding:34px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;}
+  .result-hero .emoji{font-size:2.6rem;}
+  .result-hero h2{margin:8px 0 2px;font-size:1.4rem;}
+  .result-hero p{color:var(--text-dim);margin:2px 0 14px;font-size:.86rem;}
+  .score-row{display:flex;justify-content:center;gap:24px;margin-top:10px;flex-wrap:wrap;}
+  .score-item{text-align:center;}
+  .score-item .num{font-size:1.5rem;font-weight:800;color:var(--accent);}
+  .score-item .lbl{font-size:.72rem;color:var(--text-dim);}
+  .result-actions{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+
+  .review-list{display:flex;flex-direction:column;gap:10px;}
+  .review-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;font-size:.83rem;line-height:1.6;}
+  .review-item .q{font-weight:700;margin-bottom:6px;}
+  .review-item .ans{color:var(--text-dim);}
+  .review-item .ans b.wrong{color:var(--bad);}
+  .review-item .ans b.right{color:var(--good);}
+  .review-item .why{margin-top:6px;color:var(--text-dim);}
+
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:560px){ .match-grid{grid-template-columns:1fr;} }
+  .match-col h4{font-size:.76rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px 4px;}
+  .match-item{border:2px solid var(--border);background:var(--surface);color:var(--text);border-radius:12px;padding:13px 14px;margin-bottom:10px;font-size:.85rem;cursor:pointer;transition:all .12s ease;line-height:1.5;}
+  .match-item:hover{transform:translateY(-2px);}
+  .match-item.selected{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, var(--surface));}
+  .match-item.matched{border-color:var(--good);background:color-mix(in srgb, var(--good) 14%, var(--surface));opacity:.65;cursor:default;pointer-events:none;}
+  .match-item.wrong{animation:shake .3s ease;border-color:var(--bad);}
+
+  footer{text-align:center;color:var(--text-dim);font-size:.72rem;margin-top:34px;line-height:1.8;}
+
+  .celebrate{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden;}
+  .confetti{position:absolute;top:-10px;width:8px;height:14px;opacity:.9;animation:fall linear forwards;}
+  @keyframes fall{to{ transform: translateY(110vh) rotate(360deg); opacity:.2; }}
+
+  /* ---- sim screen ---- */
+  .stepdots{display:flex;gap:6px;flex:none;}
+  .stepdot{width:9px;height:9px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);}
+  .stepdot.active{background:var(--accent);border-color:var(--accent);width:20px;border-radius:999px;transition:width .2s ease;}
+  .stepdot.done{background:var(--good);border-color:var(--good);}
+
+  .sim-hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;box-shadow:var(--shadow);margin-bottom:16px;}
+  .sim-hero .steplabel{font-size:.72rem;color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+  .sim-hero h2{margin:0 0 8px;font-size:1.15rem;line-height:1.4;}
+  .sim-hero .guide{font-size:.86rem;color:var(--text-dim);line-height:1.65;}
+
+  .sim-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
+  .sim-card h4{margin:0 0 12px;font-size:.9rem;}
+  .sim-card .note{font-size:.8rem;color:var(--text-dim);line-height:1.7;margin-top:10px;padding:10px 12px;background:var(--surface-2);border-radius:12px;border:1px solid var(--border);}
+  .sim-card .note.reveal{border-color:var(--accent);}
+
+  .sim-controls{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap;}
+  .sim-controls .right{display:flex;gap:8px;flex-wrap:wrap;}
+
+  .datatbl{width:100%;border-collapse:collapse;font-size:.82rem;overflow-x:auto;display:block;}
+  .datatbl th,.datatbl td{border:1px solid var(--border);padding:7px 9px;text-align:center;white-space:nowrap;}
+  .datatbl th{background:var(--surface-2);font-weight:700;font-size:.75rem;color:var(--text-dim);}
+  .datatbl td.missing{color:var(--bad);font-weight:800;background:color-mix(in srgb, var(--bad) 10%, transparent);}
+  .datatbl td.filled{color:var(--good);font-weight:800;background:color-mix(in srgb, var(--good) 12%, transparent);}
+  .datatbl td.outlier{color:var(--bad);font-weight:800;border:2px solid var(--bad);}
+
+  .calcbox{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;line-height:1.8;margin-top:10px;overflow-x:auto;}
+  .calcbox b{color:var(--accent);}
+
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  @media (max-width:520px){ .compare-grid{grid-template-columns:1fr;} }
+  .stat-mini{background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;}
+  .stat-mini .lbl{font-size:.74rem;color:var(--text-dim);margin-bottom:4px;}
+  .stat-mini .val{font-size:1.25rem;font-weight:800;color:var(--accent);}
+  .stat-mini.bad .val{color:var(--bad);}
+  .stat-mini.good .val{color:var(--good);}
+
+  .togglerow{display:flex;align-items:center;gap:10px;font-size:.85rem;margin:10px 0;cursor:pointer;user-select:none;}
+  .switch{position:relative;width:42px;height:24px;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;flex:none;transition:background .15s;}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:999px;background:var(--text-dim);transition:transform .15s, background .15s;}
+  .togglerow.on .switch{background:var(--accent);border-color:var(--accent);}
+  .togglerow.on .switch::after{transform:translateX(18px);background:#fff;}
+
+  .presetrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .presetbtn{border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:999px;padding:8px 14px;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .12s ease;}
+  .presetbtn:hover{border-color:var(--accent);}
+  .presetbtn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  .svgwrap{width:100%;overflow-x:auto;}
+  .svgwrap svg{display:block;width:100%;height:auto;min-width:340px;}
+  .svg-axis{stroke:var(--border);stroke-width:2;}
+  .svg-tick{stroke:var(--border);stroke-width:1;}
+  .svg-dot{fill:var(--c-blue);stroke:var(--surface);stroke-width:1.5;}
+  .svg-dot.bad{fill:var(--bad);}
+  .svg-dot.good{fill:var(--good);}
+  .svg-bound{stroke:var(--bad);stroke-width:1.5;stroke-dasharray:5 4;}
+  .svg-mean{stroke:var(--accent-2);stroke-width:2.5;}
+  .svg-median{stroke:var(--good);stroke-width:2.5;}
+  .svg-label{fill:var(--text-dim);font-size:11px;}
+  .svg-value{fill:var(--text);font-size:11px;font-weight:700;}
+  .svg-box{fill:color-mix(in srgb, var(--c-blue) 20%, transparent);stroke:var(--c-blue);stroke-width:2;}
+  .svg-bar{fill:var(--c-purple);}
+  .svg-bar.max{fill:var(--good);}
+  .svg-devpos{fill:var(--c-blue);}
+  .svg-devneg{fill:var(--bad);}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--text-dim);margin-top:8px;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand" onclick="goHome()">
+      <div class="logo">📈</div>
+      <div>
+        데이터 과학 클래스룸 게임
+        <small>고1 공동교육과정 · 데이터 과학 2단원</small>
+      </div>
+    </div>
+    <button class="iconbtn" id="themeBtn" title="테마 전환" onclick="toggleTheme()">🌓</button>
+  </div>
+
+  <!-- HOME -->
+  <section class="screen active" id="screen-home">
+    <div class="hero">
+      <h1>Ⅱ. 데이터 준비와 분석 — 퀴즈 &amp; 시뮬레이션</h1>
+      <p>
+        교과서 2단원 「데이터 준비」·「데이터 분석」의 핵심 용어는 퀴즈로 확인하고,
+        결측치·이상치 처리, 대푯값·산포도, 상관관계 같은 실습 활동은 단계별 시뮬레이션으로
+        직접 조작하며 익혀 보세요.
+      </p>
+      <div class="tags">
+        <span class="tag">데이터 편향</span>
+        <span class="tag">전처리(결측치·이상치)</span>
+        <span class="tag">정규화·표준화</span>
+        <span class="tag">대푯값·산포도</span>
+        <span class="tag">상관관계</span>
+      </div>
+    </div>
+
+    <details class="info">
+      <summary>🧑‍🏫 선생님·학생을 위한 안내</summary>
+      <div class="body">
+        이 웹앱은 2022 개정 교육과정 「데이터 과학」 2단원(데이터 준비와 분석) 내용을 바탕으로
+        제작한 <b>자기 주도형 학습 도구</b>입니다. 크게 두 가지 활동으로 구성됩니다.
+        <ul>
+          <li><b>용어 확인 퀴즈</b>: 항목을 하나씩 제시하고, 알맞은 범주나 정답을 선택하면 즉시 해설을 보여줘요.</li>
+          <li><b>단계별 시뮬레이션</b>: 실습(오렌지 프로그램) 활동의 흐름을 재구성해, 데이터표·박스 플롯·산점도를 직접 조작하며 결측치 대체, 이상치 판별, 표준화, 대푯값·산포도 비교, 상관관계 계산을 단계별 버튼으로 체험해요.</li>
+          <li>점수·진행 기록은 이 기기의 브라우저에만 저장돼요(서버 전송 없음).</li>
+          <li>활동 1개당 약 4~7분이 걸려요. 수업에서는 전체 화면으로 함께 풀거나 개인별 기기로 진행할 수 있어요.</li>
+        </ul>
+      </div>
+    </details>
+
+    <div class="section-title">📝 용어 확인 퀴즈 <span class="n">5개</span></div>
+    <div class="section-sub">개념을 분류하거나 짝짓고, 단원 전체를 아우르는 마무리 퀴즈에 도전해요.</div>
+    <div class="grid" id="quizGrid"></div>
+
+    <div class="section-title">🧪 실습 단계별 시뮬레이션 <span class="n">3개</span></div>
+    <div class="section-sub">데이터표와 그래프를 직접 조작하며 실습 과정을 단계별로 따라가요.</div>
+    <div class="grid" id="simGrid"></div>
+
+    <footer>
+      2022 개정 교육과정 「데이터 과학」 2단원 교과서 내용을 바탕으로 재구성한 학습용 시뮬레이션입니다.<br>
+      점수와 기록은 브라우저(localStorage)에만 저장되며 외부로 전송되지 않습니다.
+    </footer>
+  </section>
+
+  <!-- CHOICE GAME -->
+  <section class="screen" id="screen-choice">
+    <div class="gamebar">
+      <button class="backbtn" onclick="goHome()">← 홈</button>
+      <div class="progress-outer"><div class="progress-inner" id="choiceProgress"></div></div>
+      <div class="stats">
+        <span>점수 <b id="choiceScore">0</b></span>
+        <span>콤보 <b id="choiceStreak">0</b></span>
+      </div>
+    </div>
+
+    <button class="hint-toggle" id="hintToggleBtn" style="display:none" onclick="toggleHint()">💡 힌트 / 판별 기준 보기</button>
+    <div class="hintbox" id="hintBox"></div>
+
+    <div class="question-card">
+      <div class="qlabel" id="choiceQLabel">문항 1 / 10</div>
+      <div class="qtext" id="choiceQText">질문 텍스트</div>
+    </div>
+
+    <div class="options" id="choiceOptions"></div>
+
+    <div class="feedback" id="choiceFeedback">
+      <div class="head" id="feedbackHead"></div>
+      <div id="feedbackBody"></div>
+    </div>
+
+    <div class="nextrow">
+      <button class="btn" id="nextBtn" onclick="nextChoiceItem()" disabled>다음 →</button>
+    </div>
+  </section>
+
+  <!-- MATCH GAME -->
+  <section class="screen" id="screen-match">
+    <div class="gamebar">
+      <button class="backbtn" onclick="goHome()">← 홈</button>
+      <div class="progress-outer"><div class="progress-inner" id="matchProgress"></div></div>
+      <div class="stats">
+        <span>남은 짝 <b id="matchRemain">0</b></span>
+        <span>시도 <b id="matchTries">0</b></span>
+      </div>
+    </div>
+    <div class="question-card" style="min-height:auto;padding:18px 20px;">
+      <div class="qtext" style="font-size:.95rem;">용어와 알맞은 설명을 순서대로 눌러 짝지어 보세요.</div>
+    </div>
+    <div class="match-grid">
+      <div class="match-col">
+        <h4>용어</h4>
+        <div id="matchTerms"></div>
+      </div>
+      <div class="match-col">
+        <h4>설명</h4>
+        <div id="matchDefs"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen" id="screen-result">
+    <div class="result-hero">
+      <div class="emoji" id="resultEmoji">🏆</div>
+      <h2 id="resultTitle">게임 완료!</h2>
+      <p id="resultSub">수고했어요</p>
+      <div class="score-row" id="resultScoreRow"></div>
+      <div class="result-actions">
+        <button class="btn ghost" onclick="goHome()">홈으로</button>
+        <button class="btn" id="retryBtn">다시 도전</button>
+      </div>
+    </div>
+    <div id="reviewWrap"></div>
+  </section>
+
+  <!-- SIMULATION -->
+  <section class="screen" id="screen-sim">
+    <div class="gamebar">
+      <button class="backbtn" onclick="goHome()">← 홈</button>
+      <div class="progress-outer"><div class="progress-inner" id="simProgress"></div></div>
+      <div class="stepdots" id="simDots"></div>
+    </div>
+    <div class="sim-hero">
+      <div class="steplabel" id="simStepLabel">STEP 1 / 5</div>
+      <h2 id="simStepTitle">단계 제목</h2>
+      <div class="guide" id="simStepGuide">안내 문구</div>
+    </div>
+    <div id="simContent"></div>
+    <div class="sim-controls">
+      <button class="btn ghost" id="simPrevBtn" onclick="simPrev()">← 이전</button>
+      <button class="btn" id="simNextBtn" onclick="simNext()">다음 →</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ================= math utils ================= */
+function round2(x){ return Math.round(x*100)/100; }
+function sum(arr){ return arr.reduce((a,b)=>a+b,0); }
+function computeMean(arr){ return sum(arr)/arr.length; }
+function computeMedian(arr){
+  const s=[...arr].sort((a,b)=>a-b); const n=s.length;
+  return n%2 ? s[(n-1)/2] : (s[n/2-1]+s[n/2])/2;
+}
+function computeMode(arrObj){
+  // arrObj: {label:count}
+  let max=-1, labels=[];
+  Object.entries(arrObj).forEach(([k,v])=>{
+    if(v>max){ max=v; labels=[k]; } else if(v===max){ labels.push(k); }
+  });
+  return {labels, max};
+}
+function computeVariance(arr){ const m=computeMean(arr); return computeMean(arr.map(x=>(x-m)*(x-m))); }
+function computeStd(arr){ return Math.sqrt(computeVariance(arr)); }
+function quartiles(arr){
+  const s=[...arr].sort((a,b)=>a-b); const n=s.length;
+  let lower, upper;
+  if(n%2===0){ lower=s.slice(0,n/2); upper=s.slice(n/2); }
+  else { lower=s.slice(0,(n-1)/2); upper=s.slice((n+1)/2); }
+  return { q1:computeMedian(lower), q3:computeMedian(upper), median:computeMedian(s) };
+}
+function computeCorrelation(xs, ys){
+  const mx=computeMean(xs), my=computeMean(ys);
+  let num=0, dx2=0, dy2=0;
+  for(let i=0;i<xs.length;i++){ const dx=xs[i]-mx, dy=ys[i]-my; num+=dx*dy; dx2+=dx*dx; dy2+=dy*dy; }
+  return num/Math.sqrt(dx2*dy2);
+}
+function corrLabel(r){
+  const a=Math.abs(r);
+  const dir = r>0.05 ? "양의" : r<-0.05 ? "음의" : "";
+  if(a<0.2) return "상관관계가 거의 없음";
+  if(a<0.5) return "약한 "+dir+" 상관관계";
+  if(a<0.8) return "뚜렷한 "+dir+" 상관관계";
+  return "강한 "+dir+" 상관관계";
+}
+
+/* ================= svg helpers ================= */
+function lin(dMin,dMax,rMin,rMax){ return v => rMin + (v-dMin)/(dMax-dMin)*(rMax-rMin); }
+function svgWrap(inner,w,h){ return `<div class="svgwrap"><svg viewBox="0 0 ${w} ${h}">${inner}</svg></div>`; }
+function svgLine(x1,y1,x2,y2,cls){ return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${cls}"></line>`; }
+function svgCircle(cx,cy,r,cls){ return `<circle cx="${cx}" cy="${cy}" r="${r}" class="${cls}"></circle>`; }
+function svgText(x,y,t,cls,anchor){ return `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor||'middle'}">${t}</text>`; }
+function svgRect(x,y,w,h,cls){ return `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="${cls}" rx="3"></rect>`; }
+
+function numberLineSVG(values, opts){
+  opts = opts||{};
+  const w=600,h=130;
+  const dmin = opts.min!==undefined ? opts.min : Math.min(...values);
+  const dmax = opts.max!==undefined ? opts.max : Math.max(...values);
+  const pad = (dmax-dmin)*0.12 || 1;
+  const x = lin(dmin-pad, dmax+pad, 44, w-24);
+  let s = svgLine(44,80,w-24,80,"svg-axis");
+  if(opts.bounds){
+    if(opts.bounds.lower!==undefined){
+      s += svgLine(x(opts.bounds.lower),30,x(opts.bounds.lower),110,"svg-bound");
+      s += svgText(x(opts.bounds.lower),24,"하한 "+opts.bounds.lower,"svg-label");
+    }
+    if(opts.bounds.upper!==undefined){
+      s += svgLine(x(opts.bounds.upper),30,x(opts.bounds.upper),110,"svg-bound");
+      s += svgText(x(opts.bounds.upper),24,"상한 "+opts.bounds.upper,"svg-label");
+    }
+  }
+  values.forEach((v,i)=>{
+    const bad = opts.bounds && (v<opts.bounds.lower || v>opts.bounds.upper);
+    const cls = "svg-dot"+(bad?" bad":"");
+    s += svgCircle(x(v),80,8,cls);
+    s += svgText(x(v),102,v,"svg-value");
+  });
+  if(opts.markers){
+    opts.markers.forEach(m=>{
+      s += svgLine(x(m.v),50,x(m.v),110,"svg-"+(m.type||"mean"));
+      s += svgText(x(m.v),44,m.label,"svg-value");
+    });
+  }
+  return svgWrap(s,w,h);
+}
+
+function boxPlotSVG(stats, opts){
+  opts = opts||{};
+  const w=560,h=90;
+  const dmin = opts.min!==undefined?opts.min:stats.min;
+  const dmax = opts.max!==undefined?opts.max:stats.max;
+  const pad=(dmax-dmin)*0.08||1;
+  const x=lin(dmin-pad,dmax+pad,50,w-20);
+  const cy=45;
+  let s = svgLine(x(stats.min),cy,x(stats.q1),cy,"svg-axis");
+  s += svgLine(x(stats.q3),cy,x(stats.max),cy,"svg-axis");
+  s += svgLine(x(stats.min),cy-14,x(stats.min),cy+14,"svg-axis");
+  s += svgLine(x(stats.max),cy-14,x(stats.max),cy+14,"svg-axis");
+  s += svgRect(x(stats.q1),cy-18,x(stats.q3)-x(stats.q1),36,"svg-box");
+  s += svgLine(x(stats.median),cy-18,x(stats.median),cy+18,"svg-median");
+  s += svgText(x(stats.min),cy+34,stats.min,"svg-label");
+  s += svgText(x(stats.q1),cy+34,"Q1 "+stats.q1,"svg-label");
+  s += svgText(x(stats.median),cy-24,"중앙값 "+stats.median,"svg-value");
+  s += svgText(x(stats.q3),cy+34,"Q3 "+stats.q3,"svg-label");
+  s += svgText(x(stats.max),cy+34,stats.max,"svg-label");
+  if(opts.title) s += svgText(50,14,opts.title,"svg-value","start");
+  return svgWrap(s,w,h);
+}
+
+function barChartSVG(items, opts){
+  opts = opts||{};
+  const w=560, h=200;
+  const maxV = opts.max || Math.max(...items.map(i=>i.value))*1.15;
+  const bw = (w-60)/items.length;
+  let s = svgLine(50,160,w-10,160,"svg-axis");
+  items.forEach((it,i)=>{
+    const bh = (it.value/maxV)*120;
+    const bx = 55 + i*bw;
+    const bwid = bw*0.62;
+    s += svgRect(bx,160-bh,bwid,bh, it.max? "svg-bar max":"svg-bar");
+    s += svgText(bx+bwid/2,176,it.label,"svg-label");
+    s += svgText(bx+bwid/2,160-bh-8,it.value,"svg-value");
+  });
+  return svgWrap(s,w,h);
+}
+
+function devBarSVG(devs, opts){
+  opts = opts||{};
+  const w=560, h=190;
+  const maxAbs = Math.max(...devs.map(d=>Math.abs(d)), 1)*1.3;
+  const bw=(w-60)/devs.length;
+  const zeroY=95;
+  const scale = 70/maxAbs;
+  let s = svgLine(50,zeroY,w-10,zeroY,"svg-axis");
+  devs.forEach((d,i)=>{
+    const bx=55+i*bw, bwid=bw*0.6;
+    const bh=Math.abs(d)*scale;
+    const y = d>=0? zeroY-bh : zeroY;
+    s += svgRect(bx,y,bwid,bh, d>=0?"svg-devpos":"svg-devneg");
+    s += svgText(bx+bwid/2, d>=0? y-8 : y+bh+16, round2(d), "svg-value");
+  });
+  return svgWrap(s,w,h);
+}
+
+function scatterSVG(xs, ys, opts){
+  opts = opts||{};
+  const w=560, h=340;
+  const xmin=opts.xmin!==undefined?opts.xmin:Math.min(...xs), xmax=opts.xmax!==undefined?opts.xmax:Math.max(...xs);
+  const ymin=opts.ymin!==undefined?opts.ymin:Math.min(...ys), ymax=opts.ymax!==undefined?opts.ymax:Math.max(...ys);
+  const xpad=(xmax-xmin)*0.15||1, ypad=(ymax-ymin)*0.15||1;
+  const x=lin(xmin-xpad,xmax+xpad,54,w-20);
+  const y=lin(ymin-ypad,ymax+ypad,h-40,26);
+  let s = svgLine(54,h-40,w-20,h-40,"svg-axis") + svgLine(54,26,54,h-40,"svg-axis");
+  xs.forEach((xv,i)=>{ s += svgCircle(x(xv),y(ys[i]),7,"svg-dot"); });
+  if(opts.xLabel) s += svgText((54+w-20)/2, h-8, opts.xLabel, "svg-label");
+  if(opts.yLabel) s += svgText(16, 16, opts.yLabel, "svg-label","start");
+  return svgWrap(s,w,h);
+}
+
+/* ================= state ================= */
+let state = { gameId:null, order:[], idx:0, score:0, streak:0, bestStreak:0, mistakes:[], answered:false };
+let matchState = null;
+let simState = null;
+
+/* ================= storage ================= */
+function lsGet(key, fallback){ try{ const v=localStorage.getItem(key); return v===null?fallback:JSON.parse(v); }catch(e){ return fallback; } }
+function lsSet(key,val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+function bestKey(id){ return "ds2_best_"+id; }
+function doneKey(id){ return "ds2_done_"+id; }
+
+/* ================= theme ================= */
+function toggleTheme(){
+  const root=document.documentElement;
+  const cur=root.getAttribute("data-theme");
+  const next=cur==="dark"?"light":"dark";
+  root.setAttribute("data-theme",next);
+  lsSet("ds2_theme", next);
+}
+(function initTheme(){ const saved=lsGet("ds2_theme",null); if(saved) document.documentElement.setAttribute("data-theme",saved); })();
+
+/* ================= shuffle ================= */
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ================= navigation ================= */
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function goHome(){ renderHome(); showScreen("screen-home"); }
+
+/* ================= home ================= */
+function cardHTML(g){
+  const best = lsGet(bestKey(g.id), null);
+  const done = lsGet(doneKey(g.id), false);
+  const metaRight = g.type==="sim" ? (done? "완료했어요":"도전해 보세요")
+                   : (best!==null ? "최고 "+best+"점" : "도전해 보세요");
+  const metaLeft = g.type==="match" ? g.pairs.length+"쌍" : g.type==="sim" ? g.steps.length+"단계" : g.items.length+"문항";
+  return `
+    ${done? `<div class="done">✓ 완료</div>`:""}
+    <div class="top">
+      <div class="icon">${g.icon}</div>
+      <div><h3>${g.title}</h3><div class="ref">${g.ref}</div></div>
+    </div>
+    <div class="desc">${g.desc}</div>
+    <div class="meta"><span>${metaLeft}</span><span class="best">${metaRight}</span></div>
+  `;
+}
+function renderHome(){
+  const qGrid = document.getElementById("quizGrid");
+  const sGrid = document.getElementById("simGrid");
+  qGrid.innerHTML=""; sGrid.innerHTML="";
+  TERMGAMES.forEach(g=>{
+    const el=document.createElement("div"); el.className="card"; el.onclick=()=>startGame(g.id);
+    el.innerHTML = cardHTML(g); qGrid.appendChild(el);
+  });
+  SIMGAMES.forEach(g=>{
+    const el=document.createElement("div"); el.className="card"; el.onclick=()=>startSim(g.id);
+    el.innerHTML = cardHTML(g); sGrid.appendChild(el);
+  });
+}
+
+function startGame(id){
+  const g = TERMGAMES.find(x=>x.id===id);
+  if(g.type==="match"){ startMatch(g); return; }
+  state = { gameId:id, order:shuffle(g.items.map((_,i)=>i)), idx:0, score:0, streak:0, bestStreak:0, mistakes:[], answered:false };
+  document.getElementById("hintToggleBtn").style.display = g.hint ? "inline-flex":"none";
+  document.getElementById("hintBox").classList.remove("show");
+  document.getElementById("hintBox").innerHTML = g.hint || "";
+  showScreen("screen-choice");
+  renderChoiceItem();
+}
+function toggleHint(){ document.getElementById("hintBox").classList.toggle("show"); }
+
+/* ================= choice game ================= */
+const PALETTE = ["var(--c-blue)","var(--c-orange)","var(--c-green)","var(--c-purple)"];
+function currentGame(){ return TERMGAMES.find(g=>g.id===state.gameId); }
+
+function renderChoiceItem(){
+  const g=currentGame(); const total=state.order.length; const item=g.items[state.order[state.idx]];
+  state.answered=false;
+  document.getElementById("choiceQLabel").textContent = `문항 ${state.idx+1} / ${total}`;
+  document.getElementById("choiceQText").textContent = item.text;
+  document.getElementById("choiceProgress").style.width = Math.round((state.idx/total)*100)+"%";
+  document.getElementById("choiceScore").textContent = state.score;
+  document.getElementById("choiceStreak").textContent = state.streak;
+  document.getElementById("choiceFeedback").className = "feedback";
+  document.getElementById("nextBtn").disabled = true;
+  document.getElementById("nextBtn").textContent = (state.idx===total-1) ? "결과 보기 →" : "다음 →";
+
+  const optsWrap=document.getElementById("choiceOptions"); optsWrap.innerHTML="";
+  let optionDefs;
+  if(g.isQuiz){ optionDefs = shuffle(item.options).map((label,i)=>({label,color:PALETTE[i%PALETTE.length]})); }
+  else { optionDefs = shuffle(g.categories).map(c=>({label:c.key,color:c.color})); }
+
+  optionDefs.forEach(opt=>{
+    const btn=document.createElement("button"); btn.className="opt"; btn.textContent=opt.label;
+    btn.onclick=()=>selectChoice(btn,opt.label,item);
+    optsWrap.appendChild(btn);
+  });
+}
+
+function selectChoice(btn,label,item){
+  if(state.answered) return; state.answered=true;
+  const correct = label===item.answer;
+  const allBtns = Array.from(document.querySelectorAll("#choiceOptions .opt"));
+  allBtns.forEach(b=>{ b.disabled=true;
+    if(b.textContent===item.answer){ b.classList.add("correct"); }
+    else if(b===btn){ b.classList.add("wrong"); } else { b.classList.add("dim"); }
+  });
+  const fb=document.getElementById("choiceFeedback");
+  fb.classList.add("show", correct?"correct":"wrong");
+  document.getElementById("feedbackHead").textContent = correct? "✅ 정답이에요!" : "❌ 아쉬워요";
+  document.getElementById("feedbackBody").textContent = item.explain;
+  if(correct){
+    state.streak++; state.bestStreak=Math.max(state.bestStreak,state.streak);
+    const bonus=Math.min(state.streak-1,5)*2; state.score += 10+bonus;
+  } else {
+    state.streak=0;
+    state.mistakes.push({ q:item.text, your:label, correct:item.answer, explain:item.explain });
+  }
+  document.getElementById("choiceScore").textContent=state.score;
+  document.getElementById("choiceStreak").textContent=state.streak;
+  document.getElementById("nextBtn").disabled=false;
+}
+
+function nextChoiceItem(){
+  state.idx++;
+  if(state.idx >= state.order.length){ finishChoiceGame(); return; }
+  renderChoiceItem();
+}
+
+function finishChoiceGame(){
+  const g=currentGame(); const total=state.order.length;
+  document.getElementById("choiceProgress").style.width="100%";
+  const prevBest=lsGet(bestKey(g.id),null);
+  if(prevBest===null || state.score>prevBest) lsSet(bestKey(g.id), state.score);
+  lsSet(doneKey(g.id), true);
+  showResult({ title:g.title, correctCount: total-state.mistakes.length, total, score:state.score,
+    bestStreak: state.bestStreak, mistakes: state.mistakes, onRetry: ()=>startGame(g.id) });
+}
+
+/* ================= match game ================= */
+function startMatch(g){
+  const pairs = shuffle(g.pairs).map((p,i)=>({...p,id:i}));
+  matchState = { gameId:g.id, pairs, termOrder:shuffle(pairs.map(p=>p.id)), defOrder:shuffle(pairs.map(p=>p.id)),
+    matched:new Set(), selectedTerm:null, selectedDef:null, tries:0 };
+  showScreen("screen-match"); renderMatch();
+}
+function renderMatch(){
+  const ms=matchState;
+  const termWrap=document.getElementById("matchTerms"), defWrap=document.getElementById("matchDefs");
+  termWrap.innerHTML=""; defWrap.innerHTML="";
+  ms.termOrder.forEach(id=>{
+    const p=ms.pairs.find(x=>x.id===id);
+    const el=document.createElement("div"); el.className="match-item"; el.textContent=p.term; el.dataset.id=id;
+    if(ms.matched.has(id)) el.classList.add("matched");
+    if(ms.selectedTerm===id) el.classList.add("selected");
+    el.onclick=()=>pickTerm(id); termWrap.appendChild(el);
+  });
+  ms.defOrder.forEach(id=>{
+    const p=ms.pairs.find(x=>x.id===id);
+    const el=document.createElement("div"); el.className="match-item"; el.textContent=p.def; el.dataset.id=id;
+    if(ms.matched.has(id)) el.classList.add("matched");
+    if(ms.selectedDef===id) el.classList.add("selected");
+    el.onclick=()=>pickDef(id); defWrap.appendChild(el);
+  });
+  const remain=ms.pairs.length-ms.matched.size;
+  document.getElementById("matchRemain").textContent=remain;
+  document.getElementById("matchTries").textContent=ms.tries;
+  document.getElementById("matchProgress").style.width=Math.round((ms.matched.size/ms.pairs.length)*100)+"%";
+}
+function pickTerm(id){ if(matchState.matched.has(id)) return; matchState.selectedTerm=id; renderMatch(); tryResolveMatch(); }
+function pickDef(id){ if(matchState.matched.has(id)) return; matchState.selectedDef=id; renderMatch(); tryResolveMatch(); }
+function tryResolveMatch(){
+  const ms=matchState;
+  if(ms.selectedTerm===null || ms.selectedDef===null) return;
+  ms.tries++;
+  if(ms.selectedTerm===ms.selectedDef){
+    ms.matched.add(ms.selectedTerm); ms.selectedTerm=null; ms.selectedDef=null; renderMatch();
+    if(ms.matched.size===ms.pairs.length) setTimeout(finishMatch,350);
+  } else {
+    const termId=ms.selectedTerm, defId=ms.selectedDef;
+    document.querySelectorAll(`#matchTerms .match-item[data-id="${termId}"], #matchDefs .match-item[data-id="${defId}"]`).forEach(el=>el.classList.add("wrong"));
+    setTimeout(()=>{ ms.selectedTerm=null; ms.selectedDef=null; renderMatch(); },450);
+  }
+}
+function finishMatch(){
+  const g=TERMGAMES.find(x=>x.id===matchState.gameId);
+  const ideal=matchState.pairs.length, tries=matchState.tries;
+  const accuracy=Math.round((ideal/tries)*100);
+  const score=Math.max(10, Math.round(100*(ideal/tries)));
+  const prevBest=lsGet(bestKey(g.id),null);
+  if(prevBest===null || score>prevBest) lsSet(bestKey(g.id), score);
+  lsSet(doneKey(g.id), true);
+  showResult({ title:g.title, correctCount:ideal, total:ideal, score,
+    extraLine:`총 ${tries}번 시도해서 ${ideal}쌍을 모두 맞혔어요 (정확도 ${accuracy}%).`,
+    mistakes:[], onRetry:()=>startMatch(g) });
+}
+
+/* ================= result ================= */
+function showResult({title, correctCount, total, score, bestStreak, mistakes, extraLine, onRetry}){
+  document.getElementById("resultTitle").textContent = title+" 완료!";
+  const ratio = total? correctCount/total : 1;
+  document.getElementById("resultEmoji").textContent = ratio===1?"🏆":ratio>=0.7?"🎉":"💪";
+  document.getElementById("resultSub").textContent = extraLine ||
+    (ratio===1 ? "모든 문항을 맞혔어요! 완벽해요." : ratio>=0.7 ? "정말 잘했어요! 오답도 확인해 보세요." : "다시 도전하면 더 잘할 수 있어요.");
+  const row=document.getElementById("resultScoreRow");
+  row.innerHTML = `
+    <div class="score-item"><div class="num">${correctCount}/${total}</div><div class="lbl">정답 수</div></div>
+    <div class="score-item"><div class="num">${score}</div><div class="lbl">점수</div></div>
+    ${bestStreak!==undefined? `<div class="score-item"><div class="num">${bestStreak}</div><div class="lbl">최대 콤보</div></div>` : ""}
+  `;
+  const reviewWrap=document.getElementById("reviewWrap");
+  if(mistakes && mistakes.length){
+    reviewWrap.innerHTML = `<h3 style="font-size:.95rem;margin:6px 4px 12px;">📝 다시 확인해 볼 문항</h3><div class="review-list" id="reviewList"></div>`;
+    const list=document.getElementById("reviewList");
+    mistakes.forEach(m=>{
+      const el=document.createElement("div"); el.className="review-item";
+      el.innerHTML = `<div class="q">${m.q}</div><div class="ans">내가 고른 답: <b class="wrong">${m.your}</b> · 정답: <b class="right">${m.correct}</b></div><div class="why">${m.explain}</div>`;
+      list.appendChild(el);
+    });
+  } else { reviewWrap.innerHTML=""; }
+  document.getElementById("retryBtn").onclick=onRetry;
+  showScreen("screen-result"); burstConfetti();
+}
+function burstConfetti(){
+  const colors=["#4f5cff","#7c3aed","#16a34a","#d97706","#dc2626"];
+  const layer=document.createElement("div"); layer.className="celebrate"; document.body.appendChild(layer);
+  for(let i=0;i<40;i++){
+    const c=document.createElement("div"); c.className="confetti";
+    c.style.left=Math.random()*100+"vw"; c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDuration=(2+Math.random()*1.5)+"s"; c.style.animationDelay=(Math.random()*0.4)+"s";
+    layer.appendChild(c);
+  }
+  setTimeout(()=>layer.remove(),3600);
+}
+
+/* ================= simulation engine ================= */
+function startSim(id){
+  const g = SIMGAMES.find(x=>x.id===id);
+  simState = { simId:id, stepIdx:0, data:{} };
+  showScreen("screen-sim");
+  renderSimStep();
+}
+function renderSimStep(){
+  const g = SIMGAMES.find(x=>x.id===simState.simId);
+  const total = g.steps.length;
+  const step = g.steps[simState.stepIdx];
+  document.getElementById("simProgress").style.width = Math.round((simState.stepIdx/(total-1))*100)+"%";
+  document.getElementById("simStepLabel").textContent = `STEP ${simState.stepIdx+1} / ${total}`;
+  document.getElementById("simStepTitle").textContent = step.title;
+  document.getElementById("simStepGuide").textContent = step.guide;
+  const dots = document.getElementById("simDots"); dots.innerHTML="";
+  for(let i=0;i<total;i++){
+    const d=document.createElement("div");
+    d.className = "stepdot"+(i===simState.stepIdx?" active":"")+(i<simState.stepIdx?" done":"");
+    dots.appendChild(d);
+  }
+  const content = document.getElementById("simContent");
+  content.innerHTML = "";
+  step.render(content, simState.data);
+  document.getElementById("simPrevBtn").disabled = simState.stepIdx===0;
+  document.getElementById("simNextBtn").textContent = (simState.stepIdx===total-1) ? "완료하고 홈으로 →" : "다음 →";
+}
+function simPrev(){ if(simState.stepIdx>0){ simState.stepIdx--; renderSimStep(); } }
+function simNext(){
+  const g = SIMGAMES.find(x=>x.id===simState.simId);
+  if(simState.stepIdx >= g.steps.length-1){
+    lsSet(doneKey(g.id), true);
+    goHome();
+    return;
+  }
+  simState.stepIdx++;
+  renderSimStep();
+}
+
+/* ================= content: quiz games ================= */
+const TERMGAMES = [
+  {
+    id:"bias", type:"choice", icon:"⚖️", title:"데이터 편향 유형 분류",
+    ref:"1. 데이터 준비 · 데이터 수집과 선택",
+    desc:"확증 편향·선택 편향·사회적 편향 중 어떤 편향의 사례인지 분류해 보세요.",
+    categories:[ {key:"확증 편향",color:PALETTE[0]}, {key:"선택 편향",color:PALETTE[1]}, {key:"사회적 편향",color:PALETTE[2]} ],
+    hint:`<b>편향 판별 기준</b>
+      <ol>
+        <li><b>선택 편향</b>: 특정 조건의 데이터만 수집되어 전체(모집단)를 대표하지 못하는 경우</li>
+        <li><b>확증 편향</b>: 자신의 신념·가설에 부합하는 정보만 찾고, 반대되는 정보는 무시하는 경우</li>
+        <li><b>사회적 편향</b>: 성별·인종·연령 등 특정 집단에 대해 부정확하거나 불공정한 판단을 하는 경우</li>
+      </ol>`,
+    items:[
+      {text:"농촌 지역 학생들을 조사 대상에서 제외하고 청소년 전체의 스마트폰 사용 습관을 분석했다.", answer:"선택 편향",
+       explain:"특정 조건(도시 지역)의 데이터만 수집되어 전체를 대표하지 못하므로 '선택 편향'이에요."},
+      {text:"비만의 원인을 고열량 음식 섭취로만 단정 짓고, 운동 부족이나 유전 등 다른 원인은 살펴보지 않았다.", answer:"확증 편향",
+       explain:"자신의 가설을 뒷받침하는 정보만 찾고 반대되는 정보는 무시했으므로 '확증 편향'이에요."},
+      {text:"비만인 학생은 게으를 것이라고 판단하여 면접 점수를 낮게 주었다.", answer:"사회적 편향",
+       explain:"특정 집단에 대해 부정확하거나 불공정한 판단을 했으므로 '사회적 편향'이에요."},
+      {text:"혈액형 성격설을 믿고, 그 성격이 나타날 때까지 상대방의 행동을 관찰해 확신을 굳혔다.", answer:"확증 편향",
+       explain:"자신의 신념(혈액형 성격설)에 부합하는 행동만 주목했으므로 '확증 편향'이에요."},
+      {text:"채용 과정에서 나이가 많은 지원자는 기술 적응력이 낮을 것이라 판단해 낮은 평가를 주었다.", answer:"사회적 편향",
+       explain:"연령이라는 특정 집단에 대한 편견이 반영되었으므로 '사회적 편향'이에요."},
+      {text:"무사히 귀환한 전투기의 손상 부위만 분석하고, 추락한 전투기는 조사하지 않았다.", answer:"선택 편향",
+       explain:"생존(귀환)한 사례만 수집되어 추락 사례를 포함한 전체를 대표하지 못했으므로 '선택 편향'이에요."},
+      {text:"설문 응답을 거부한 저소득층 데이터를 제외한 채 평균 소득을 계산했다.", answer:"선택 편향",
+       explain:"특정 집단(저소득층)이 제외되어 전체를 대표하지 못하므로 '선택 편향'이에요."},
+      {text:"자신의 예상과 다른 실험 결과가 나오자 데이터 입력 오류라고 여기고 무시했다.", answer:"확증 편향",
+       explain:"자신의 신념과 다른 정보를 무시했으므로 '확증 편향'이에요."},
+      {text:"설문 대상자를 성별과 지역을 고려하지 않고 특정 동아리 학생들로만 구성했다.", answer:"선택 편향",
+       explain:"특정 조건(동아리)의 학생만 포함되어 전체를 대표하지 못하므로 '선택 편향'이에요."},
+    ]
+  },
+  {
+    id:"prep", type:"choice", icon:"🧰", title:"데이터 전처리 방법 분류",
+    ref:"1. 데이터 준비 · 데이터 전처리와 시각화",
+    desc:"정제·통합·축소·변환 중 어떤 전처리 방법에 해당하는지 골라보세요.",
+    categories:[ {key:"정제",color:PALETTE[0]}, {key:"통합",color:PALETTE[1]}, {key:"축소",color:PALETTE[2]}, {key:"변환",color:PALETTE[3]} ],
+    hint:`<b>데이터 전처리 방법</b>
+      <ol>
+        <li><b>정제</b>: 오류, 불일치, 누락 데이터를 제거하거나 수정 (결측치 처리, 이상치 제거 등)</li>
+        <li><b>통합</b>: 서로 유사하거나 동질성을 가진 데이터를 하나로 합침 (데이터 연계, 속성 통합 등)</li>
+        <li><b>축소</b>: 데이터 크기가 너무 크면 분석이 어려우므로 크기를 줄임 (샘플링, 차원 축소, 속성 선택 등)</li>
+        <li><b>변환</b>: 분석에 적합한 형태로 바꿈 (정규화, 집계, 데이터 형 변환 등)</li>
+      </ol>`,
+    items:[
+      {text:"결측치가 있는 데이터를 평균값으로 채운다.", answer:"정제", explain:"결측치 처리는 오류·누락 데이터를 수정하는 작업이므로 '정제'예요."},
+      {text:"이상치로 판단된 값을 데이터셋에서 제거한다.", answer:"정제", explain:"이상치 제거도 데이터의 오류를 바로잡는 작업이므로 '정제'예요."},
+      {text:"두 데이터셋을 공통된 '연도' 열을 기준으로 하나로 합친다.", answer:"통합", explain:"여러 데이터셋을 연결해 하나로 합치는 작업이므로 '통합'이에요."},
+      {text:"여러 출처에서 수집한 데이터를 하나의 일관된 형식으로 결합한다.", answer:"통합", explain:"서로 다른 데이터를 결합하는 과정이므로 '통합'이에요."},
+      {text:"데이터 양이 너무 많아 일부만 무작위로 뽑아 분석한다.", answer:"축소", explain:"샘플링으로 데이터 크기를 줄였으므로 '축소'예요."},
+      {text:"분석에 필요 없는 속성(열)을 제거하여 데이터 크기를 줄인다.", answer:"축소", explain:"속성 선택으로 데이터 크기를 줄였으므로 '축소'예요."},
+      {text:"속성값을 0에서 1 사이의 범위로 정규화한다.", answer:"변환", explain:"분석하기 좋은 형태로 값을 바꾸는 것이므로 '변환'이에요."},
+      {text:"'2024년', '24' 등 서로 다른 형식의 연도 데이터를 'YYYY' 형식으로 통일한다.", answer:"변환", explain:"데이터 형(형식)을 바꾸는 작업이므로 '변환'이에요."},
+      {text:"데이터의 평균을 0, 표준편차를 1로 맞추어 표준화한다.", answer:"변환", explain:"표준화는 분석에 적합한 형태로 값을 바꾸는 것이므로 '변환'이에요."},
+      {text:"차원 축소를 통해 데이터의 속성 수를 줄인다.", answer:"축소", explain:"데이터 크기(차원)를 줄이는 작업이므로 '축소'예요."},
+    ]
+  },
+  {
+    id:"viz", type:"choice", icon:"📊", title:"데이터 시각화 방법 분류",
+    ref:"1. 데이터 준비 · 데이터 전처리와 시각화",
+    desc:"시간·분포·관계·공간 시각화 중 어떤 방법이 적절한지 분류해 보세요.",
+    categories:[ {key:"시간 시각화",color:PALETTE[0]}, {key:"분포 시각화",color:PALETTE[1]}, {key:"관계 시각화",color:PALETTE[2]}, {key:"공간 시각화",color:PALETTE[3]} ],
+    hint:`<b>시각화 방법 판별 기준</b>
+      <ol>
+        <li><b>시간 시각화</b>: 시간 흐름에 따른 변화 (선 그래프, 막대그래프)</li>
+        <li><b>분포 시각화</b>: 전체적인 구조나 분포 (히스토그램, 박스 플롯)</li>
+        <li><b>관계 시각화</b>: 두 속성 이상의 연관성 (산점도, 히트맵, 평행좌표 플롯)</li>
+        <li><b>공간 시각화</b>: 지도 위에 위치·거리를 표현 (점 지도, 등치 지역도)</li>
+      </ol>`,
+    items:[
+      {text:"연도별 해수면 높이 변화를 선 그래프로 나타낸다.", answer:"시간 시각화", explain:"시간의 흐름에 따른 변화이므로 '시간 시각화'예요."},
+      {text:"시간대별 방문자 수를 막대그래프로 비교한다.", answer:"시간 시각화", explain:"시간 간격에 따른 값을 비교하므로 '시간 시각화'예요."},
+      {text:"분기별 물가 변동 추이를 선 그래프로 살펴본다.", answer:"시간 시각화", explain:"시계열 데이터의 변화를 나타내므로 '시간 시각화'예요."},
+      {text:"학생들의 시험 점수 분포를 히스토그램으로 나타낸다.", answer:"분포 시각화", explain:"데이터가 일정 구간에 어떻게 분포하는지 보여 주므로 '분포 시각화'예요."},
+      {text:"여러 그룹의 키 분포를 박스 플롯으로 비교한다.", answer:"분포 시각화", explain:"그룹별 분포 구조를 나타내므로 '분포 시각화'예요."},
+      {text:"키와 몸무게 사이의 상관관계를 산점도로 살펴본다.", answer:"관계 시각화", explain:"두 속성 간의 연관성을 탐색하므로 '관계 시각화'예요."},
+      {text:"여러 제품의 판매량과 광고비 사이의 상관성을 히트맵으로 표현한다.", answer:"관계 시각화", explain:"속성 간 상관성을 색상으로 표현하므로 '관계 시각화'예요."},
+      {text:"여러 변수의 값을 동시에 비교하기 위해 평행좌표 플롯을 사용한다.", answer:"관계 시각화", explain:"여러 변수 간의 관계를 동시에 살펴보므로 '관계 시각화'예요."},
+      {text:"지역별 인구 분포를 점 지도로 표현한다.", answer:"공간 시각화", explain:"지도 위에 위치를 표시하므로 '공간 시각화'예요."},
+      {text:"지역별 출산율의 상대적 차이를 등치 지역도로 표현한다.", answer:"공간 시각화", explain:"지역별 값을 색상 강도로 지도에 표현하므로 '공간 시각화'예요."},
+    ]
+  },
+  {
+    id:"terms", type:"match", icon:"🔑", title:"핵심 용어 짝짓기",
+    ref:"1~2. 데이터 준비와 분석 · 핵심 용어",
+    desc:"편향·결측치·이상치부터 정규화·대푯값·상관계수까지 용어를 짝지어 보세요.",
+    pairs:[
+      {term:"데이터 편향", def:"데이터가 현실 세계를 표현하지 못하거나 한쪽으로 치우친 성질"},
+      {term:"결측치", def:"데이터셋에서 기록되지 않거나 누락된 값"},
+      {term:"이상치", def:"데이터의 범위에서 많이 벗어난 아주 작은 값이나 큰 값"},
+      {term:"정규화", def:"속성값을 0에서 1 사이의 범위로 변환하여 크기 차이의 영향을 줄이는 과정"},
+      {term:"표준화", def:"데이터의 평균을 0, 표준편차를 1로 변환하는 스케일링 방법"},
+      {term:"대푯값", def:"데이터 전체의 특징을 대표적으로 나타내는 값(평균, 중앙값, 최빈값 등)"},
+      {term:"산포도", def:"데이터가 중심값에서 얼마나 흩어져 있는지를 나타내는 값"},
+      {term:"상관계수", def:"두 속성 간 상관관계의 방향과 강도를 -1에서 1 사이의 숫자로 표현한 값"},
+    ]
+  },
+  {
+    id:"quiz", type:"choice", icon:"🏆", title:"단원 마무리 퀴즈",
+    ref:"Ⅱ. 데이터 준비와 분석 · 단원 정리",
+    desc:"2단원 전체 내용을 아우르는 객관식 문제 10개에 도전해 보세요.",
+    isQuiz:true,
+    items:[
+      {text:"특정 조건의 데이터만 수집되어 전체 모집단을 대표하지 못하는 편향은?",
+       options:["확증 편향","선택 편향","사회적 편향","통계 편향"], answer:"선택 편향",
+       explain:"선택 편향은 특정 조건의 데이터만 수집되어 전체를 대표하지 못하는 현상이에요."},
+      {text:"결측치를 처리하는 방법으로 옳지 않은 것은?",
+       options:["평균값으로 대체한다","최빈값으로 대체한다","결측치가 포함된 행을 그대로 방치한다","데이터 양이 충분할 때 결측치를 삭제한다"],
+       answer:"결측치가 포함된 행을 그대로 방치한다",
+       explain:"결측치는 분석 결과의 신뢰성을 떨어뜨리므로 반드시 적절한 방법으로 처리해야 해요."},
+      {text:"이상치를 판별할 때 사용하는 기준으로 옳은 것은?",
+       options:["Q1-1.5×IQR보다 작거나 Q3+1.5×IQR보다 큰 값","평균에서 1만큼 떨어진 값","최빈값과 다른 모든 값","중앙값보다 큰 값"],
+       answer:"Q1-1.5×IQR보다 작거나 Q3+1.5×IQR보다 큰 값",
+       explain:"박스 플롯에서는 사분위 범위(IQR)를 이용해 하한값과 상한값을 벗어난 값을 이상치로 간주해요."},
+      {text:"데이터의 평균을 0, 표준편차를 1로 변환하는 스케일링 방법은?",
+       options:["정규화","표준화","이산화","범주화"], answer:"표준화",
+       explain:"표준화는 평균과 표준편차를 기반으로 데이터를 변환하는 방법이에요."},
+      {text:"여러 개의 데이터셋을 공통된 속성을 기준으로 하나로 합치는 과정은?",
+       options:["데이터 정제","데이터 통합","데이터 축소","데이터 변환"], answer:"데이터 통합",
+       explain:"데이터 통합은 여러 데이터셋을 하나의 일관된 형식으로 결합하는 과정이에요."},
+      {text:"시계열 데이터를 시각화할 때 주로 사용하는 방법은?",
+       options:["히스토그램","히트맵","선 그래프","등치 지역도"], answer:"선 그래프",
+       explain:"시간의 흐름에 따른 변화는 선 그래프나 막대그래프로 시각화해요."},
+      {text:"데이터 전체의 특징을 대표적으로 나타내는 값이 아닌 것은?",
+       options:["평균","중앙값","최빈값","표준편차"], answer:"표준편차",
+       explain:"표준편차는 산포도에 해당하며, 대푯값은 평균·중앙값·최빈값이에요."},
+      {text:"이상치의 영향을 상대적으로 적게 받는 대푯값은?",
+       options:["평균","중앙값","표준편차","분산"], answer:"중앙값",
+       explain:"중앙값은 크기 순서로 나열했을 때 가운데 위치한 값으로, 극단값의 영향을 적게 받아요."},
+      {text:"두 속성 사이의 상관관계 방향과 강도를 -1에서 1 사이의 숫자로 나타낸 것은?",
+       options:["분산","표준편차","상관계수","사분위수 범위"], answer:"상관계수",
+       explain:"상관계수 r은 -1에서 1 사이의 값으로 상관관계의 방향과 강도를 나타내요."},
+      {text:"상관관계와 인과관계에 대한 설명으로 옳은 것은?",
+       options:["상관관계가 있으면 반드시 인과관계도 있다","상관관계가 있다고 해서 반드시 인과관계가 있는 것은 아니다","인과관계가 없으면 상관관계도 없다","상관계수가 0이면 항상 아무 관계가 없다"],
+       answer:"상관관계가 있다고 해서 반드시 인과관계가 있는 것은 아니다",
+       explain:"선풍기와 아이스크림 판매량처럼 상관관계가 있어도 다른 원인(날씨)이 함께 작용할 수 있어요."},
+    ]
+  },
+];
+
+/* ================= content: simulations ================= */
+const SIMGAMES = [
+  {
+    id:"prep-sim", type:"sim", icon:"🧹", title:"결측치·이상치 처리 시뮬레이션",
+    ref:"1. 데이터 준비 · 데이터 전처리와 시각화 실습",
+    desc:"수면 데이터를 단계별로 정제하며 결측치 대체, 이상치 판별, 표준화를 직접 체험해요.",
+    steps:[
+      { title:"① 결측치 찾고 대체하기", guide:"수면 시간(Sleep Duration) 데이터 중 하나가 '?'로 표시된 결측치예요. 평균값으로 대체해 보세요.",
+        render(el, d){
+          const raw=[7.2,6.5,7.8,null,6.9,7.5,7.0,6.2,7.9,7.1];
+          if(d.sleepFilled===undefined) d.sleepFilled=false;
+          const known = raw.filter(v=>v!==null);
+          const mean = round2(computeMean(known));
+          const shown = raw.map(v=> v===null ? (d.sleepFilled? mean : null) : v);
+          let rows="";
+          shown.forEach((v,i)=>{
+            const cls = v===null ? "missing" : (raw[i]===null && d.sleepFilled ? "filled" : "");
+            rows += `<td class="${cls}">${v===null? "?" : v}</td>`;
+          });
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>학생 10명의 수면 시간(시간)</h4>
+              <table class="datatbl"><tr><th>ID</th>${raw.map((_,i)=>`<td>${i+1}</td>`).join("")}</tr>
+              <tr><th>Sleep&nbsp;Duration</th>${rows}</tr></table>
+              <button class="btn sm" style="margin-top:14px" id="fillBtn">평균값으로 결측치 대체하기</button>
+              <div class="calcbox" id="calcArea">${d.sleepFilled ? `평균 = (${known.join(" + ")}) ÷ ${known.length} = <b>${mean}</b><br>4번 학생의 결측치를 평균값 <b>${mean}</b>시간으로 대체했어요.` : "아직 대체하지 않았어요. 버튼을 눌러 결측치를 채워 보세요."}</div>
+            </div>`;
+          el.querySelector("#fillBtn").onclick = ()=>{ d.sleepFilled=true; renderSimStep(); };
+        }
+      },
+      { title:"② 이상치 판별하기 (박스 플롯)", guide:"신체 활동 수준(Physical Activity Level, 분) 10개 값의 사분위수를 구해 하한값·상한값을 계산하고, 이를 벗어나는 이상치를 찾아보세요.",
+        render(el, d){
+          const vals=[30,45,48,50,55,60,65,70,75,130];
+          const q=quartiles(vals);
+          const iqr=round2(q.q3-q.q1);
+          const lower=round2(q.q1-1.5*iqr), upper=round2(q.q3+1.5*iqr);
+          if(d.showBounds===undefined) d.showBounds=false;
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>신체 활동 수준 10개 값 (분)</h4>
+              ${numberLineSVG(vals, d.showBounds? {bounds:{lower,upper}} : {})}
+              <button class="btn sm" style="margin-top:6px" id="calcBtn">Q1·Q3·IQR 계산해서 이상치 찾기</button>
+              <div class="calcbox" id="calcArea">${d.showBounds ? `
+                제1사분위수(Q1) = <b>${q.q1}</b> · 제3사분위수(Q3) = <b>${q.q3}</b><br>
+                사분위수 범위(IQR) = Q3 − Q1 = ${q.q3} − ${q.q1} = <b>${iqr}</b><br>
+                하한값 = Q1 − 1.5×IQR = ${q.q1} − 1.5×${iqr} = <b>${lower}</b><br>
+                상한값 = Q3 + 1.5×IQR = ${q.q3} + 1.5×${iqr} = <b>${upper}</b><br>
+                → <b style="color:var(--bad)">130</b>은 상한값(${upper})보다 크므로 <b style="color:var(--bad)">이상치</b>예요.
+              ` : "버튼을 누르면 사분위수와 이상치 판별 기준이 계산돼요."}</div>
+            </div>`;
+          el.querySelector("#calcBtn").onclick=()=>{ d.showBounds=true; d.outlierBounds={lower,upper}; d.outlierVals=vals; renderSimStep(); };
+        }
+      },
+      { title:"③ 이상치 처리 효과 비교하기", guide:"이상치(130)를 포함했을 때와 제거했을 때, 평균과 분산이 어떻게 달라지는지 비교해 보세요.",
+        render(el, d){
+          const vals = d.outlierVals || [30,45,48,50,55,60,65,70,75,130];
+          const bounds = d.outlierBounds || {lower:15, upper:103};
+          const withOut = vals;
+          const withoutOut = vals.filter(v=>v<=bounds.upper && v>=bounds.lower);
+          const m1=round2(computeMean(withOut)), v1=round2(computeVariance(withOut));
+          const m2=round2(computeMean(withoutOut)), v2=round2(computeVariance(withoutOut));
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>이상치 포함 vs 제거 후 통곗값 비교</h4>
+              <div class="compare-grid">
+                <div class="stat-mini bad"><div class="lbl">이상치 포함 (n=${withOut.length})</div><div class="val">평균 ${m1}</div><div class="val" style="font-size:.95rem">분산 ${v1}</div></div>
+                <div class="stat-mini good"><div class="lbl">이상치 제거 (n=${withoutOut.length})</div><div class="val">평균 ${m2}</div><div class="val" style="font-size:.95rem">분산 ${v2}</div></div>
+              </div>
+              <div class="note">이상치 하나(130)가 포함되면 평균이 <b>${round2(m1-m2)}</b>만큼 커지고, 분산도 함께 커져요. 이처럼 이상치는 통곗값을 왜곡할 수 있어 상황에 맞게 처리하는 것이 중요해요.</div>
+            </div>`;
+        }
+      },
+      { title:"④ 표준화(Z-score)하기", guide:"스트레스 수준 데이터를 표준화(Z-score)하여 평균 0, 표준편차 1로 변환해 보세요.",
+        render(el, d){
+          const vals=[3,5,6,4,7,5,6,8,4,5];
+          const mean=round2(computeMean(vals)), std=round2(computeStd(vals));
+          if(d.standardized===undefined) d.standardized=false;
+          const z = vals.map(v=> round2((v-mean)/std));
+          let rows1="", rows2="";
+          vals.forEach((v,i)=>{ rows1+=`<td>${v}</td>`; rows2+=`<td>${d.standardized? z[i] : "—"}</td>`; });
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>스트레스 수준(1~10) 10개 값</h4>
+              <table class="datatbl"><tr><th>원본</th>${rows1}</tr><tr><th>표준화(z)</th>${rows2}</tr></table>
+              <button class="btn sm" style="margin-top:14px" id="stdBtn">표준화 적용하기</button>
+              <div class="calcbox">${d.standardized ? `평균 = <b>${mean}</b>, 표준편차 = <b>${std}</b><br>z = (x − 평균) ÷ 표준편차 → 예: 1번째 값 (${vals[0]} − ${mean}) ÷ ${std} = <b>${z[0]}</b><br>표준화 후 평균은 0에 가까워지고, 값들이 0을 중심으로 재배치돼요.` : "버튼을 누르면 각 값이 z-점수로 변환돼요."}</div>
+              ${d.standardized ? numberLineSVG(z, {min:-2.5,max:2.5,markers:[{v:0,label:"0",type:"mean"}]}) : ""}
+            </div>`;
+          el.querySelector("#stdBtn").onclick=()=>{ d.standardized=true; renderSimStep(); };
+        }
+      },
+      { title:"⑤ 정리하기", guide:"이번 시뮬레이션에서 수행한 전처리 과정을 정리해 보세요.",
+        render(el, d){
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>✅ 전처리 요약</h4>
+              <div class="note reveal">
+                1) 결측치는 <b>평균값</b>으로 대체했어요.<br>
+                2) 사분위수 범위(IQR)를 이용해 <b>130</b>을 이상치로 판별했어요.<br>
+                3) 이상치를 제거하면 평균과 분산의 왜곡이 줄어드는 것을 확인했어요.<br>
+                4) 표준화(Z-score)를 통해 서로 다른 단위의 속성값을 평균 0, 표준편차 1 기준으로 비교할 수 있게 만들었어요.<br><br>
+                이러한 결측치 처리 → 이상치 처리 → 표준화 순서는 실제 오렌지 프로그램 실습(78~81쪽)에서도 동일하게 적용돼요.
+              </div>
+            </div>`;
+        }
+      },
+    ]
+  },
+  {
+    id:"stat-sim", type:"sim", icon:"📐", title:"대푯값·산포도 비교 시뮬레이션",
+    ref:"2. 데이터 분석 · 데이터 속성별 특징",
+    desc:"평균·중앙값·최빈값과 분산·표준편차·사분위수 범위를 직접 조작하며 비교해요.",
+    steps:[
+      { title:"① 평균 vs 중앙값 — 이상치의 영향", guide:"B그룹의 1일 SNS 사용 시간(분) 데이터예요. 이상치(200분)를 포함하거나 제외하며 평균과 중앙값이 어떻게 달라지는지 확인해 보세요.",
+        render(el, d){
+          if(d.includeOutlier===undefined) d.includeOutlier=true;
+          const base=[30,30,31,31,31,32,32,33];
+          const vals = d.includeOutlier ? [...base,200] : base;
+          const mean=round2(computeMean(vals)), median=computeMedian(vals);
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>B그룹 1일 SNS 앱 사용 시간(분)</h4>
+              <div class="togglerow ${d.includeOutlier?'on':''}" id="toggleOutlier"><div class="switch"></div>이상치(200분) 포함하기</div>
+              ${numberLineSVG(vals, {min:20,max:210, markers:[{v:mean,label:"평균 "+mean,type:"mean"},{v:median,label:"중앙값 "+median,type:"median"}]})}
+              <div class="legend"><span><i style="background:var(--accent-2)"></i>평균</span><span><i style="background:var(--good)"></i>중앙값</span></div>
+              <div class="note">${d.includeOutlier ? "이상치(200)가 포함되면 평균이 중앙값보다 훨씬 커져요. 평균은 극단값에 민감해요." : "이상치를 제외하면 평균과 중앙값이 비슷해져요. 중앙값은 극단값의 영향을 적게 받아요."}</div>
+            </div>`;
+          el.querySelector("#toggleOutlier").onclick=()=>{ d.includeOutlier=!d.includeOutlier; renderSimStep(); };
+        }
+      },
+      { title:"② 최빈값 — 범주형 데이터", guide:"A그룹과 B그룹의 희망 진로 조사 결과예요. 그룹을 선택해 최빈값(가장 많이 나온 값)을 확인해 보세요.",
+        render(el, d){
+          if(d.group===undefined) d.group="A";
+          const counts = { A:{"인문사회":2,"이학공학":6,"예술체육":1}, B:{"인문사회":5,"이학공학":1,"예술체육":3} };
+          const c = counts[d.group];
+          const mode = computeMode(c);
+          const items = Object.entries(c).map(([label,value])=>({label,value,max: mode.labels.includes(label)}));
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>희망 진로 조사 결과 (${d.group}그룹)</h4>
+              <div class="presetrow">
+                <button class="presetbtn ${d.group==='A'?'active':''}" id="btnA">A그룹</button>
+                <button class="presetbtn ${d.group==='B'?'active':''}" id="btnB">B그룹</button>
+              </div>
+              ${barChartSVG(items)}
+              <div class="note">${d.group}그룹의 최빈값은 <b>${mode.labels.join(", ")}</b>이에요 (${mode.max}명으로 가장 많음). 범주형 데이터는 평균을 구할 수 없어 최빈값을 대푯값으로 사용해요.</div>
+            </div>`;
+          el.querySelector("#btnA").onclick=()=>{ d.group="A"; renderSimStep(); };
+          el.querySelector("#btnB").onclick=()=>{ d.group="B"; renderSimStep(); };
+        }
+      },
+      { title:"③ 분산과 표준편차 계산기", guide:"버튼을 눌러 편차 → 편차 제곱 → 분산 → 표준편차 순서로 계산 과정을 단계별로 살펴보세요.",
+        render(el, d){
+          if(d.varStage===undefined) d.varStage=0;
+          const vals=[4,6,5,7,3];
+          const mean=computeMean(vals);
+          const devs=vals.map(v=>v-mean);
+          const sq=devs.map(v=>v*v);
+          const variance=round2(computeMean(sq));
+          const std=round2(Math.sqrt(variance));
+          const stageLabels=["평균 구하기","편차 구하기 (값-평균)","편차 제곱하기","분산 = 편차 제곱의 평균","표준편차 = 분산의 제곱근"];
+          let chart;
+          if(d.varStage<=1) chart = devBarSVG(d.varStage===0? vals.map(()=>0) : devs);
+          else chart = devBarSVG(sq.map(v=>v));
+          let explainLine="";
+          if(d.varStage===0) explainLine = `평균 = (${vals.join("+")}) ÷ ${vals.length} = <b>${mean}</b>`;
+          else if(d.varStage===1) explainLine = `편차 = 각 값 − 평균 → [${devs.map(round2).join(", ")}]`;
+          else if(d.varStage===2) explainLine = `편차 제곱 → [${sq.map(round2).join(", ")}]`;
+          else if(d.varStage===3) explainLine = `분산 = 편차 제곱의 평균 = (${sq.map(round2).join("+")}) ÷ ${sq.length} = <b>${variance}</b>`;
+          else explainLine = `표준편차 = √분산 = √${variance} = <b>${std}</b>`;
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>예시 데이터: [${vals.join(", ")}]</h4>
+              <div class="presetrow">${stageLabels.map((l,i)=>`<button class="presetbtn ${d.varStage===i?'active':''}" data-i="${i}">${i+1}. ${l}</button>`).join("")}</div>
+              ${chart}
+              <div class="calcbox">${explainLine}</div>
+            </div>`;
+          el.querySelectorAll(".presetbtn").forEach(b=>{ b.onclick=()=>{ d.varStage=Number(b.dataset.i); renderSimStep(); }; });
+        }
+      },
+      { title:"④ 사분위수 범위(IQR)와 박스 플롯 비교", guide:"A반과 B반의 시험 점수 박스 플롯을 비교해, 사분위수 범위(IQR)가 넓을수록 점수가 더 넓게 흩어져 있음을 확인해 보세요.",
+        render(el, d){
+          const A={min:50,q1:65,median:75,q3:85,max:95};
+          const B={min:30,q1:55,median:70,q3:95,max:100};
+          const iqrA=A.q3-A.q1, iqrB=B.q3-B.q1;
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>A반 시험 점수 (IQR = ${iqrA}점)</h4>
+              ${boxPlotSVG(A,{min:20,max:110})}
+              <h4 style="margin-top:16px">B반 시험 점수 (IQR = ${iqrB}점)</h4>
+              ${boxPlotSVG(B,{min:20,max:110})}
+              <div class="note">A반은 사분위수 범위(IQR)가 ${iqrA}점으로 좁아 점수가 고르게 분포되어 있고, B반은 IQR이 ${iqrB}점으로 넓어 점수 차이(산포도)가 더 커요.</div>
+            </div>`;
+        }
+      },
+      { title:"⑤ 정리하기", guide:"대푯값과 산포도 학습 내용을 정리해 보세요.", render(el,d){
+          el.innerHTML = `<div class="sim-card"><h4>✅ 정리</h4><div class="note reveal">
+            대푯값(평균·중앙값·최빈값)은 데이터 전체 특징을 하나의 값으로 나타내고,<br>
+            산포도(분산·표준편차·사분위수 범위)는 데이터가 대푯값에서 얼마나 흩어져 있는지 나타내요.<br><br>
+            이상치가 있을 때는 평균보다 <b>중앙값</b>이, 범주형 데이터에는 <b>최빈값</b>이 더 적절한 대푯값이 될 수 있어요.
+          </div></div>`;
+        }
+      },
+    ]
+  },
+  {
+    id:"corr-sim", type:"sim", icon:"🔗", title:"상관관계 탐색 시뮬레이션",
+    ref:"2. 데이터 분석 · 속성 간의 관계",
+    desc:"산점도와 상관계수를 직접 조작해 상관관계의 방향과 강도, 인과관계와의 차이를 체험해요.",
+    steps:[
+      { title:"① 산점도로 상관관계 살펴보기", guide:"네 가지 유형의 산점도를 눌러보며 상관계수(r)가 어떻게 달라지는지 확인해 보세요.",
+        render(el, d){
+          if(d.pattern===undefined) d.pattern="pos";
+          const xs=[1,2,3,4,5,6,7,8,9,10];
+          const sets={
+            pos:[2,3,3,5,6,6,8,8,9,10],
+            neg:[10,9,8,7,7,6,5,4,3,2],
+            none:[5,8,3,7,2,9,4,6,1,10],
+            weak:[3,6,4,7,5,9,6,8,7,10],
+          };
+          const labels={pos:"강한 양의 상관",neg:"강한 음의 상관",none:"상관관계 없음",weak:"약한 상관"};
+          const ys=sets[d.pattern];
+          const r=round2(computeCorrelation(xs,ys));
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>산점도 유형 선택</h4>
+              <div class="presetrow">${Object.keys(sets).map(k=>`<button class="presetbtn ${d.pattern===k?'active':''}" data-k="${k}">${labels[k]}</button>`).join("")}</div>
+              ${scatterSVG(xs,ys,{xLabel:"속성 X",yLabel:"속성 Y"})}
+              <div class="calcbox">상관계수 r ≈ <b>${r}</b> → ${corrLabel(r)}</div>
+            </div>`;
+          el.querySelectorAll(".presetbtn").forEach(b=>{ b.onclick=()=>{ d.pattern=b.dataset.k; renderSimStep(); }; });
+        }
+      },
+      { title:"② 상관계수 계산해 보기", guide:"스트레스 수준과 수면의 질 5개 데이터로 상관계수를 계산하는 과정을 단계별로 확인해 보세요.",
+        render(el, d){
+          if(d.corrStage===undefined) d.corrStage=0;
+          const xs=[8,6,7,4,5], ys=[3,5,4,7,6];
+          const mx=computeMean(xs), my=computeMean(ys);
+          const dxs=xs.map(x=>round2(x-mx)), dys=ys.map(y=>round2(y-my));
+          const prods=xs.map((x,i)=>round2(dxs[i]*dys[i]));
+          const r=round2(computeCorrelation(xs,ys));
+          const rowsX=xs.map(v=>`<td>${v}</td>`).join("");
+          const rowsY=ys.map(v=>`<td>${v}</td>`).join("");
+          const rowsDX = d.corrStage>=1 ? dxs.map(v=>`<td>${v}</td>`).join("") : xs.map(()=>`<td>—</td>`).join("");
+          const rowsDY = d.corrStage>=1 ? dys.map(v=>`<td>${v}</td>`).join("") : xs.map(()=>`<td>—</td>`).join("");
+          const rowsP = d.corrStage>=2 ? prods.map(v=>`<td>${v}</td>`).join("") : xs.map(()=>`<td>—</td>`).join("");
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>스트레스 수준(X)과 수면의 질(Y)</h4>
+              <table class="datatbl">
+                <tr><th>스트레스(X)</th>${rowsX}</tr>
+                <tr><th>수면의 질(Y)</th>${rowsY}</tr>
+                <tr><th>편차 dx</th>${rowsDX}</tr>
+                <tr><th>편차 dy</th>${rowsDY}</tr>
+                <tr><th>dx × dy</th>${rowsP}</tr>
+              </table>
+              <div class="presetrow" style="margin-top:12px">
+                <button class="presetbtn ${d.corrStage===0?'active':''}" id="s0">① 평균 구하기</button>
+                <button class="presetbtn ${d.corrStage===1?'active':''}" id="s1">② 편차 구하기</button>
+                <button class="presetbtn ${d.corrStage===2?'active':''}" id="s2">③ 편차 곱하기</button>
+                <button class="presetbtn ${d.corrStage===3?'active':''}" id="s3">④ 상관계수 계산</button>
+              </div>
+              <div class="calcbox">${
+                d.corrStage===0 ? `평균 X = ${round2(mx)}, 평균 Y = ${round2(my)}` :
+                d.corrStage===1 ? `편차 dx = X − 평균X, dy = Y − 평균Y` :
+                d.corrStage===2 ? `dx × dy를 각각 곱해요. 합 = ${round2(sum(prods))}` :
+                `r = Σ(dx·dy) ÷ √(Σdx²·Σdy²) = <b>${r}</b> → ${corrLabel(r)}`
+              }</div>
+            </div>`;
+          ["s0","s1","s2","s3"].forEach((id,i)=>{ el.querySelector("#"+id).onclick=()=>{ d.corrStage=i; renderSimStep(); }; });
+        }
+      },
+      { title:"③ 상관관계 vs 인과관계", guide:"선풍기 판매량과 아이스크림 판매량은 양의 상관관계를 보여요. 선풍기 판매가 늘어난 것이 아이스크림 판매 증가의 '원인'일까요?",
+        render(el, d){
+          if(d.guessed===undefined) d.guessed=null;
+          const xs=[1,2,3,4,5,6,7,8], ys=[2,3,4,5,6,7,7,9];
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>선풍기 판매량(X) vs 아이스크림 판매량(Y)</h4>
+              ${scatterSVG(xs,ys,{xLabel:"선풍기 판매량",yLabel:"아이스크림 판매량"})}
+              <div class="presetrow">
+                <button class="presetbtn ${d.guessed==='yes'?'active':''}" id="yesBtn">선풍기 판매가 원인이다</button>
+                <button class="presetbtn ${d.guessed==='no'?'active':''}" id="noBtn">원인이라 보기 어렵다</button>
+              </div>
+              ${d.guessed ? `<div class="note reveal">정답은 <b>'원인이라 보기 어렵다'</b>예요. 선풍기와 아이스크림 판매량 사이에는 양의 상관관계가 있지만, 실제 원인은 '더운 날씨'라는 제3의 요인이에요. 이처럼 상관관계가 있다고 해서 반드시 인과관계가 있는 것은 아니에요.</div>` : ""}
+            </div>`;
+          el.querySelector("#yesBtn").onclick=()=>{ d.guessed="yes"; renderSimStep(); };
+          el.querySelector("#noBtn").onclick=()=>{ d.guessed="no"; renderSimStep(); };
+        }
+      },
+      { title:"④ 상관계수 해석 시 주의할 점", guide:"두 산점도 모두 상관계수가 0에 가깝지만, 실제 관계는 서로 달라요. 상관계수는 '선형' 관계만 측정한다는 점에 유의해야 해요.",
+        render(el, d){
+          const xs=[-3,-2,-1,0,1,2,3];
+          const yA=[1,-2,3,-1,2,-3,0];
+          const yB=[9,4,1,0,1,4,9];
+          const rA=round2(computeCorrelation(xs,yA));
+          const rB=round2(computeCorrelation(xs,yB));
+          el.innerHTML = `
+            <div class="sim-card">
+              <h4>산점도 A (특별한 패턴 없음)</h4>
+              ${scatterSVG(xs,yA,{xmin:-4,xmax:4,ymin:-4,ymax:4})}
+              <div class="calcbox">상관계수 r ≈ <b>${rA}</b></div>
+              <h4 style="margin-top:18px">산점도 B (U자 형태의 뚜렷한 패턴)</h4>
+              ${scatterSVG(xs,yB,{xmin:-4,xmax:4,ymin:-2,ymax:10})}
+              <div class="calcbox">상관계수 r ≈ <b>${rB}</b></div>
+              <div class="note">두 산점도 모두 상관계수가 0에 가깝지만, B는 뚜렷한 U자형 패턴이 있어요. 상관계수는 <b>선형 관계</b>만 측정하므로, 산점도를 함께 확인해 비선형 관계를 놓치지 않아야 해요.</div>
+            </div>`;
+        }
+      },
+      { title:"⑤ 정리하기", guide:"상관관계 탐색 학습 내용을 정리해 보세요.", render(el,d){
+          el.innerHTML = `<div class="sim-card"><h4>✅ 정리</h4><div class="note reveal">
+            상관계수(r)는 -1~1 사이의 값으로 두 속성 간 선형 관계의 방향과 강도를 나타내요.<br>
+            r이 1에 가까우면 강한 양의 상관, -1에 가까우면 강한 음의 상관, 0에 가까우면 상관관계가 약해요.<br><br>
+            상관관계가 있다고 해서 반드시 인과관계가 있는 것은 아니며, 상관계수만으로는 비선형 관계를 파악하기 어려우므로 산점도를 함께 확인하는 것이 중요해요.
+          </div></div>`;
+        }
+      },
+    ]
+  },
+];
+
+/* ================= init ================= */
+renderHome();
+</script>
+</body>
+</html>
