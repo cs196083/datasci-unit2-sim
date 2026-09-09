@@ -230,6 +230,34 @@
   .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.76rem;color:var(--text-dim);margin-top:8px;}
   .legend span{display:inline-flex;align-items:center;gap:5px;}
   .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+  /* ---- orange-canvas widget simulation ---- */
+  .oc-canvaswrap{background:var(--surface-2);border:1px dashed var(--border);border-radius:14px;padding:16px 14px 12px;margin-bottom:4px;overflow-x:auto;}
+  .oc-hint{font-size:.72rem;color:var(--text-dim);margin:0 0 10px;}
+  .oc-flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;}
+  .oc-arrow{color:var(--text-dim);font-size:1.2rem;padding:0 8px;flex:none;}
+  .oc-branch{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--border);padding-left:14px;margin-left:2px;}
+  .oc-node{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:9px 13px;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:.78rem;font-weight:700;transition:all .12s ease;position:relative;flex:none;margin:4px 0;}
+  .oc-node:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .oc-node.active{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, var(--surface));box-shadow:var(--shadow);}
+  .oc-node .catdot{width:8px;height:8px;border-radius:999px;flex:none;}
+  .oc-node .badge{position:absolute;top:-9px;left:-9px;width:19px;height:19px;border-radius:999px;background:var(--accent);color:#fff;font-size:.66rem;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .oc-window{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin-top:14px;overflow:hidden;animation:fadein .2s ease;}
+  .oc-titlebar{background:var(--surface-2);padding:9px 14px;font-size:.78rem;font-weight:800;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+  .oc-titlebar .dots{display:flex;gap:5px;margin-right:2px;}
+  .oc-titlebar .dots span{width:8px;height:8px;border-radius:999px;background:var(--border);display:inline-block;}
+  .oc-winbody{padding:16px;}
+  .oc-placeholder{font-size:.82rem;color:var(--text-dim);padding:26px 20px;text-align:center;border:1px dashed var(--border);border-radius:14px;margin-top:14px;}
+  .oc-radio-list{display:flex;flex-direction:column;gap:7px;margin:10px 0;}
+  .oc-radio{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:.8rem;transition:all .12s ease;}
+  .oc-radio:hover{border-color:var(--accent);}
+  .oc-radio.selected{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, var(--surface));}
+  .oc-radio .odesc{color:var(--text-dim);font-size:.73rem;margin-top:2px;line-height:1.5;}
+  .oc-fact{font-size:.8rem;line-height:1.7;color:var(--text-dim);background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:10px;}
+  .oc-fact b{color:var(--text);}
+  .oc-tag{display:inline-block;font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:999px;margin-bottom:8px;}
+  .oc-tag.real{background:color-mix(in srgb, var(--good) 18%, transparent);color:var(--good);}
+  .oc-tag.demo{background:color-mix(in srgb, var(--c-orange) 20%, transparent);color:var(--c-orange);}
 </style>
 </head>
 <body>
@@ -271,7 +299,7 @@
         제작한 <b>자기 주도형 학습 도구</b>입니다. 크게 두 가지 활동으로 구성됩니다.
         <ul>
           <li><b>용어 확인 퀴즈</b>: 항목을 하나씩 제시하고, 알맞은 범주나 정답을 선택하면 즉시 해설을 보여줘요.</li>
-          <li><b>단계별 시뮬레이션</b>: 실습(오렌지 프로그램) 활동의 흐름을 재구성해, 데이터표·박스 플롯·산점도를 직접 조작하며 결측치 대체, 이상치 판별, 표준화, 대푯값·산포도 비교, 상관관계 계산을 단계별 버튼으로 체험해요.</li>
+          <li><b>단계별 시뮬레이션</b>: 교과서에 실린 오렌지(Orange) 프로그램의 위젯 캔버스 화면을 그대로 재현했어요. File·Impute·Box Plot·Correlations 같은 위젯을 실제 순서대로 클릭하면, 더블 클릭했을 때처럼 결과 창(데이터표·통계·그래프)이 열려요.</li>
           <li>점수·진행 기록은 이 기기의 브라우저에만 저장돼요(서버 전송 없음).</li>
           <li>활동 1개당 약 4~7분이 걸려요. 수업에서는 전체 화면으로 함께 풀거나 개인별 기기로 진행할 수 있어요.</li>
         </ul>
@@ -536,6 +564,60 @@ function scatterSVG(xs, ys, opts){
   xs.forEach((xv,i)=>{ s += svgCircle(x(xv),y(ys[i]),7,"svg-dot"); });
   if(opts.xLabel) s += svgText((54+w-20)/2, h-8, opts.xLabel, "svg-label");
   if(opts.yLabel) s += svgText(16, 16, opts.yLabel, "svg-label","start");
+  return svgWrap(s,w,h);
+}
+
+/* ================= orange-canvas widget helpers ================= */
+const CATCOLOR = { data:"var(--c-blue)", transform:"var(--c-orange)", visualize:"var(--c-green)", unsup:"var(--c-purple)" };
+function ocNodeHTML(n, activeId){
+  const isActive = activeId===n.id;
+  return `<div class="oc-node ${isActive?'active':''}" data-node="${n.id}">
+    ${n.badge? `<span class="badge">${n.badge}</span>`:""}
+    <span class="catdot" style="background:${CATCOLOR[n.cat]||'var(--text-dim)'}"></span>
+    <span>${n.icon} ${n.label}</span>
+  </div>`;
+}
+function ocCanvasHTML(groups, activeId, hint){
+  let html = `<div class="oc-canvaswrap">`;
+  if(hint) html += `<div class="oc-hint">${hint}</div>`;
+  html += `<div class="oc-flow">`;
+  groups.forEach((g,i)=>{
+    if(i>0) html += `<span class="oc-arrow">→</span>`;
+    if(g.branch){ html += `<div class="oc-branch">` + g.branch.map(n=>ocNodeHTML(n,activeId)).join("") + `</div>`; }
+    else { html += ocNodeHTML(g.node, activeId); }
+  });
+  html += `</div></div>`;
+  return html;
+}
+function ocWindow(title, bodyHTML){
+  return `<div class="oc-window">
+    <div class="oc-titlebar"><span class="dots"><span></span><span></span><span></span></span>${title}</div>
+    <div class="oc-winbody">${bodyHTML}</div>
+  </div>`;
+}
+function ocPlaceholder(msg){ return `<div class="oc-placeholder">🖱️ ${msg||"위젯을 클릭하면 결과 창이 열려요."}</div>`; }
+function ocRadioList(options, selectedVal){
+  return `<div class="oc-radio-list">` + options.map(o=>`
+    <div class="oc-radio ${o.val===selectedVal?'selected':''}" data-val="${o.val}">
+      <div><b>${o.label}</b>${o.desc? `<div class="odesc">${o.desc}</div>`:""}</div>
+    </div>`).join("") + `</div>`;
+}
+function ocTag(kind){ return kind==="real" ? `<span class="oc-tag real">📘 교과서 실제 결과</span>` : `<span class="oc-tag demo">🧪 예시로 체험하기</span>`; }
+function bindOcNodes(el, onClick){ el.querySelectorAll(".oc-node").forEach(node=>{ node.onclick=()=>onClick(node.dataset.node); }); }
+function bindOcRadios(el, onPick){ el.querySelectorAll(".oc-radio").forEach(r=>{ r.onclick=()=>onPick(r.dataset.val); }); }
+
+function lerpColor(c1,c2,t){ return c1.map((v,i)=> Math.round(v+(c2[i]-v)*t)); }
+function heatMapSVG(rows, cols, matrix){
+  const w=600; const cellW=Math.floor((w-140)/cols.length); const cellH=26; const h=42+rows.length*cellH+8;
+  let s="";
+  cols.forEach((m,j)=>{ s += svgText(140+j*cellW+cellW/2, 20, m, "svg-label"); });
+  rows.forEach((row,i)=>{
+    s += svgText(8, 42+i*cellH+cellH/2+4, row, "svg-label","start");
+    matrix[i].forEach((v,j)=>{
+      const [r,g,b] = lerpColor([37,99,235],[220,38,38], Math.max(0,Math.min(1,v)));
+      s += `<rect x="${140+j*cellW}" y="${42+i*cellH}" width="${cellW-3}" height="${cellH-4}" fill="rgb(${r},${g},${b})" rx="3"></rect>`;
+    });
+  });
   return svgWrap(s,w,h);
 }
 
@@ -962,323 +1044,389 @@ const TERMGAMES = [
 /* ================= content: simulations ================= */
 const SIMGAMES = [
   {
-    id:"prep-sim", type:"sim", icon:"🧹", title:"결측치·이상치 처리 시뮬레이션",
-    ref:"1. 데이터 준비 · 데이터 전처리와 시각화 실습",
-    desc:"수면 데이터를 단계별로 정제하며 결측치 대체, 이상치 판별, 표준화를 직접 체험해요.",
+    id:"prep-sim", type:"sim", icon:"🧹", title:"수면 데이터 전처리 시뮬레이션 (오렌지 프로그램)",
+    ref:"1. 데이터 준비 · 데이터 전처리와 시각화 실습 (78~82쪽)",
+    desc:"교과서의 오렌지 프로그램 위젯 캔버스를 그대로 재현했어요. File→Impute→Box Plot→Preprocess로 이어지는 실습을 위젯을 클릭하며 직접 체험해요.",
     steps:[
-      { title:"① 결측치 찾고 대체하기", guide:"수면 시간(Sleep Duration) 데이터 중 하나가 '?'로 표시된 결측치예요. 평균값으로 대체해 보세요.",
-        render(el, d){
-          const raw=[7.2,6.5,7.8,null,6.9,7.5,7.0,6.2,7.9,7.1];
-          if(d.sleepFilled===undefined) d.sleepFilled=false;
-          const known = raw.filter(v=>v!==null);
-          const mean = round2(computeMean(known));
-          const shown = raw.map(v=> v===null ? (d.sleepFilled? mean : null) : v);
-          let rows="";
-          shown.forEach((v,i)=>{
-            const cls = v===null ? "missing" : (raw[i]===null && d.sleepFilled ? "filled" : "");
-            rows += `<td class="${cls}">${v===null? "?" : v}</td>`;
-          });
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>학생 10명의 수면 시간(시간)</h4>
-              <table class="datatbl"><tr><th>ID</th>${raw.map((_,i)=>`<td>${i+1}</td>`).join("")}</tr>
-              <tr><th>Sleep&nbsp;Duration</th>${rows}</tr></table>
-              <button class="btn sm" style="margin-top:14px" id="fillBtn">평균값으로 결측치 대체하기</button>
-              <div class="calcbox" id="calcArea">${d.sleepFilled ? `평균 = (${known.join(" + ")}) ÷ ${known.length} = <b>${mean}</b><br>4번 학생의 결측치를 평균값 <b>${mean}</b>시간으로 대체했어요.` : "아직 대체하지 않았어요. 버튼을 눌러 결측치를 채워 보세요."}</div>
-            </div>`;
-          el.querySelector("#fillBtn").onclick = ()=>{ d.sleepFilled=true; renderSimStep(); };
-        }
-      },
-      { title:"② 이상치 판별하기 (박스 플롯)", guide:"신체 활동 수준(Physical Activity Level, 분) 10개 값의 사분위수를 구해 하한값·상한값을 계산하고, 이를 벗어나는 이상치를 찾아보세요.",
-        render(el, d){
-          const vals=[30,45,48,50,55,60,65,70,75,130];
-          const q=quartiles(vals);
-          const iqr=round2(q.q3-q.q1);
-          const lower=round2(q.q1-1.5*iqr), upper=round2(q.q3+1.5*iqr);
-          if(d.showBounds===undefined) d.showBounds=false;
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>신체 활동 수준 10개 값 (분)</h4>
-              ${numberLineSVG(vals, d.showBounds? {bounds:{lower,upper}} : {})}
-              <button class="btn sm" style="margin-top:6px" id="calcBtn">Q1·Q3·IQR 계산해서 이상치 찾기</button>
-              <div class="calcbox" id="calcArea">${d.showBounds ? `
-                제1사분위수(Q1) = <b>${q.q1}</b> · 제3사분위수(Q3) = <b>${q.q3}</b><br>
-                사분위수 범위(IQR) = Q3 − Q1 = ${q.q3} − ${q.q1} = <b>${iqr}</b><br>
-                하한값 = Q1 − 1.5×IQR = ${q.q1} − 1.5×${iqr} = <b>${lower}</b><br>
-                상한값 = Q3 + 1.5×IQR = ${q.q3} + 1.5×${iqr} = <b>${upper}</b><br>
-                → <b style="color:var(--bad)">130</b>은 상한값(${upper})보다 크므로 <b style="color:var(--bad)">이상치</b>예요.
-              ` : "버튼을 누르면 사분위수와 이상치 판별 기준이 계산돼요."}</div>
-            </div>`;
-          el.querySelector("#calcBtn").onclick=()=>{ d.showBounds=true; d.outlierBounds={lower,upper}; d.outlierVals=vals; renderSimStep(); };
-        }
-      },
-      { title:"③ 이상치 처리 효과 비교하기", guide:"이상치(130)를 포함했을 때와 제거했을 때, 평균과 분산이 어떻게 달라지는지 비교해 보세요.",
-        render(el, d){
-          const vals = d.outlierVals || [30,45,48,50,55,60,65,70,75,130];
-          const bounds = d.outlierBounds || {lower:15, upper:103};
-          const withOut = vals;
-          const withoutOut = vals.filter(v=>v<=bounds.upper && v>=bounds.lower);
-          const m1=round2(computeMean(withOut)), v1=round2(computeVariance(withOut));
-          const m2=round2(computeMean(withoutOut)), v2=round2(computeVariance(withoutOut));
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>이상치 포함 vs 제거 후 통곗값 비교</h4>
+      { title:"① 데이터 불러오기 (File → Data Table / Feature Statistics)",
+        guide:"File 위젯으로 'Sleep.csv'를 불러왔어요. 위젯을 클릭해 데이터 속성과 통계를 확인해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"file",icon:"📁",label:"File",cat:"data",badge:"➊"}},
+            {branch:[ {id:"dtable",icon:"📋",label:"Data Table",cat:"data",badge:"➋"}, {id:"fstat",icon:"📊",label:"Feature Statistics",cat:"data",badge:"➌"} ]} ];
+          const panels={
+            file:{title:"File — Sleep.csv", body:`${ocTag("real")}<div class="oc-fact">이 데이터셋은 <b>10개의 속성</b>으로 <b>374개</b>의 데이터 행으로 구성되어 있으며 <b>0.1%의 결측치</b>가 존재해요.</div>
+              <div class="legend" style="margin-top:10px">${["Person ID","Gender","Age","Occupation","Sleep Duration","Quality of Sleep","Physical Activity Level","Stress Level","Daily Steps","Sleep Disorder"].map(a=>`<span class="tag">${a}</span>`).join("")}</div>`},
+            dtable:{title:"Data Table — Sleep.csv", body:`
+              <table class="datatbl"><tr><th>ID</th><th>Age</th><th>Occupation</th><th>Sleep Duration</th></tr>
+              <tr><td>1</td><td>27</td><td>Engineer</td><td>7.8</td></tr>
+              <tr><td>2</td><td>29</td><td>Lawyer</td><td>6.5</td></tr>
+              <tr><td>93</td><td>35</td><td>Software Engineer</td><td>8.8</td></tr>
+              <tr><td>98</td><td>40</td><td>Nurse</td><td class="missing">?</td></tr>
+              <tr><td>104</td><td>36</td><td>Teacher</td><td>5.9</td></tr>
+              </table>
+              <div class="oc-fact">${ocTag("real")}<br>수면 시간(Sleep Duration) 값 중 <b>93번 행</b>(35세 소프트웨어 엔지니어)은 값이 크고, <b>104번 행</b>(36세 교사)은 상대적으로 작아요. <b>96~100번 행</b> 부근에는 물음표(?)로 표기된 결측치가 있어요.</div>`},
+            fstat:{title:"Feature Statistics — Sleep.csv", body:`
               <div class="compare-grid">
-                <div class="stat-mini bad"><div class="lbl">이상치 포함 (n=${withOut.length})</div><div class="val">평균 ${m1}</div><div class="val" style="font-size:.95rem">분산 ${v1}</div></div>
-                <div class="stat-mini good"><div class="lbl">이상치 제거 (n=${withoutOut.length})</div><div class="val">평균 ${m2}</div><div class="val" style="font-size:.95rem">분산 ${v2}</div></div>
+                <div class="stat-mini"><div class="lbl">속성 수</div><div class="val">10개</div></div>
+                <div class="stat-mini"><div class="lbl">데이터 행</div><div class="val">374개</div></div>
               </div>
-              <div class="note">이상치 하나(130)가 포함되면 평균이 <b>${round2(m1-m2)}</b>만큼 커지고, 분산도 함께 커져요. 이처럼 이상치는 통곗값을 왜곡할 수 있어 상황에 맞게 처리하는 것이 중요해요.</div>
-            </div>`;
+              <div class="oc-fact">${ocTag("real")}<br>결측치 비율은 <b>0.1%</b>로 확인돼요. 다음 단계에서 Impute 위젯으로 이 결측치를 처리해 볼게요.</div>`},
+          };
+          renderOcStep(el,d,"o1",groups,panels,"File 위젯을 눌러 데이터를 확인한 뒤, Data Table과 Feature Statistics도 각각 눌러보세요.");
         }
       },
-      { title:"④ 표준화(Z-score)하기", guide:"스트레스 수준 데이터를 표준화(Z-score)하여 평균 0, 표준편차 1로 변환해 보세요.",
-        render(el, d){
+      { title:"② 결측치 처리하기 (Impute 위젯)",
+        guide:"Impute 위젯을 클릭해 'Default Method'를 선택해 보세요. 어떤 방법을 고르는지에 따라 결측치 처리 결과가 달라져요.",
+        render(el,d){
+          if(d.m2===undefined) d.m2=null;
+          const groups=[ {node:{id:"file",icon:"📁",label:"File",cat:"data"}}, {node:{id:"impute",icon:"🩹",label:"Impute",cat:"transform",badge:"➊"}}, {node:{id:"dtable2",icon:"📋",label:"Data Table",cat:"data",badge:"➋"}} ];
+          const options=[
+            {val:"none",label:"Don't Impute",desc:"아무것도 채우지 않아요."},
+            {val:"avg",label:"Average / Most frequent",desc:"평균값 또는 최빈값을 사용해요."},
+            {val:"distinct",label:"As distinct value",desc:"새로운 값으로 대체해요."},
+            {val:"fixed",label:"Fixed values",desc:"고정된 값으로 대체해요."},
+            {val:"model",label:"Model-based imputer",desc:"다른 속성으로 예측 모델을 만들어 가장 유사한 값을 선택해요."},
+            {val:"random",label:"Random values",desc:"각 속성의 분포를 계산한 후 무작위로 선택해요."},
+            {val:"remove",label:"Remove instances with unknown values",desc:"결측치가 포함된 데이터를 제거해요."},
+          ];
+          const resultMsg = {
+            none:"결측치가 그대로 남아있어요 (Sleep Duration = ?).",
+            avg:`평균값인 <b>7.132</b>로 대체된 것을 확인할 수 있어요.`,
+            distinct:"결측치 자리에 새로운 값(예: 'unknown')이 들어가요.",
+            fixed:"미리 정한 고정값(예: 0)으로 대체돼요.",
+            model:"다른 속성들로 예측한 값으로 채워져요.",
+            random:"분포를 반영한 무작위 값으로 채워져요.",
+            remove:"결측치가 있던 98번 행 자체가 데이터에서 제거돼요.",
+          };
+          const panels={
+            impute:{title:"Impute — Default Method", body:`${ocRadioList(options,d.m2)}<div class="oc-fact">${d.m2? (d.m2==="avg"? ocTag("real"):ocTag("demo")) : ""} ${d.m2? resultMsg[d.m2] : "방법을 하나 선택해 보세요. 수치형 속성인 Sleep Duration에는 <b>Average/Most frequent</b>가 적합해요."}</div>`},
+            dtable2:{title:"Data Table — 결측치 처리 결과", body: !d.m2 ? ocPlaceholder("먼저 Impute 위젯에서 처리 방법을 선택해 보세요.") : `
+              <table class="datatbl"><tr><th>ID</th><th>Occupation</th><th>Sleep Duration</th></tr>
+              <tr><td>98</td><td>Nurse</td><td class="${d.m2==='remove'?'':'filled'}">${d.m2==='remove'? '(삭제됨)' : d.m2==='avg' ? '7.132' : d.m2==='none' ? '?' : '(대체값)'}</td></tr></table>
+              <div class="oc-fact">${d.m2==="avg" ? ocTag("real") : ocTag("demo")} ${resultMsg[d.m2]}</div>`},
+          };
+          renderOcStep(el,d,"o2",groups,panels,"Impute 위젯을 눌러 Default Method를 고른 다음, Data Table에서 결과를 확인해 보세요.");
+        }
+      },
+      { title:"③ 이상치 판별하기 (Box Plot 위젯)",
+        guide:"Box Plot 위젯에서 Variable을 'Physical Activity Level'로 설정했어요. 사분위수와 이상치 판별 기준을 확인해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"file",icon:"📁",label:"File",cat:"data"}}, {node:{id:"boxplot",icon:"📦",label:"Box Plot",cat:"visualize",badge:"➊"}} ];
+          const stats={min:5,q1:45,median:60,q3:75,max:95};
+          const panels={
+            boxplot:{title:"Box Plot — Variable: Physical Activity Level", body:`
+              <div class="oc-fact" style="margin-bottom:10px">Variable = <b>Physical Activity Level</b></div>
+              ${boxPlotSVG(stats,{min:0,max:135})}
+              ${numberLineSVG([5,30,45,60,75,90,95,130],{min:0,max:135,bounds:{lower:0,upper:120}})}
+              <div class="oc-fact">${ocTag("real")}<br>사분위수 범위는 <b>30(75−45)</b>이므로 하한값은 45−(30×1.5)=<b>0</b>, 상한값은 75+(30×1.5)=<b>120</b>이에요. 이 범위를 벗어난 <b>130</b>이 이상치로 판별돼요.</div>`},
+          };
+          renderOcStep(el,d,"o3",groups,panels,"Box Plot 위젯을 눌러 이상치 판별 기준을 확인해 보세요.");
+        }
+      },
+      { title:"④ 이상치 처리하기 (Formula → Select Rows → Feature Statistics)",
+        guide:"Formula로 이상치 여부를 계산하고, Select Rows로 이상치를 제외한 뒤, Feature Statistics로 처리 전후를 비교해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"formula",icon:"ƒ",label:"Formula",cat:"transform",badge:"➊"}}, {node:{id:"selrows",icon:"🔎",label:"Select Rows",cat:"transform",badge:"➋"}}, {node:{id:"fstat3",icon:"📊",label:"Feature Statistics",cat:"data",badge:"➌"}} ];
+          const panels={
+            formula:{title:"Formula — 새 속성 만들기", body:`
+              <div class="calcbox">outlier = <b>0</b> if Physical_Activity_Level &gt; 120 else <b>1</b></div>
+              <div class="oc-fact">${ocTag("real")}<br>새로운 'outlier' 속성이 생성되고, 이상치 1개가 발견돼요.</div>`},
+            selrows:{title:"Select Rows — 조건 설정", body:`
+              <div class="calcbox">Add Condition → <b>Physical Activity Level ≤ 120</b> 인 데이터만 남기기</div>
+              <div class="oc-fact">${ocTag("real")}<br>이상치로 판별된 1건이 제외된 데이터셋을 얻어요.</div>`},
+            fstat3:{title:"Feature Statistics — 처리 전후 비교", body:`
+              <div class="compare-grid">
+                <div class="stat-mini bad"><div class="lbl">이상치 포함(처리 전)</div><div class="val">평균 59.61</div><div class="val" style="font-size:.95rem">분산 0.38</div></div>
+                <div class="stat-mini good"><div class="lbl">이상치 제거(처리 후)</div><div class="val">평균 59.13</div><div class="val" style="font-size:.95rem">분산 0.35</div></div>
+              </div>
+              <div class="oc-fact">${ocTag("real")}<br>이상치가 큰 값일수록 분산과 표준편차가 커져 결과가 왜곡될 수 있어요. 이상치를 처리하면 일반적인 값의 분포를 더 잘 반영해요.</div>`},
+          };
+          renderOcStep(el,d,"o4",groups,panels,"Formula → Select Rows → Feature Statistics 순서로 위젯을 눌러 보세요.");
+        }
+      },
+      { title:"⑤ 표준화하기 (Select Columns → Preprocess)",
+        guide:"표준화할 속성만 선택한 뒤, Preprocess 위젯에서 Normalize Features → Standardize를 적용해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"selcol",icon:"🧮",label:"Select Columns",cat:"transform",badge:"➊"}}, {node:{id:"preprocess",icon:"⚙️",label:"Preprocess",cat:"transform",badge:"➋"}}, {node:{id:"dtable5",icon:"📋",label:"Data Table",cat:"data",badge:"➌"}} ];
           const vals=[3,5,6,4,7,5,6,8,4,5];
           const mean=round2(computeMean(vals)), std=round2(computeStd(vals));
-          if(d.standardized===undefined) d.standardized=false;
-          const z = vals.map(v=> round2((v-mean)/std));
-          let rows1="", rows2="";
-          vals.forEach((v,i)=>{ rows1+=`<td>${v}</td>`; rows2+=`<td>${d.standardized? z[i] : "—"}</td>`; });
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>스트레스 수준(1~10) 10개 값</h4>
-              <table class="datatbl"><tr><th>원본</th>${rows1}</tr><tr><th>표준화(z)</th>${rows2}</tr></table>
-              <button class="btn sm" style="margin-top:14px" id="stdBtn">표준화 적용하기</button>
-              <div class="calcbox">${d.standardized ? `평균 = <b>${mean}</b>, 표준편차 = <b>${std}</b><br>z = (x − 평균) ÷ 표준편차 → 예: 1번째 값 (${vals[0]} − ${mean}) ÷ ${std} = <b>${z[0]}</b><br>표준화 후 평균은 0에 가까워지고, 값들이 0을 중심으로 재배치돼요.` : "버튼을 누르면 각 값이 z-점수로 변환돼요."}</div>
-              ${d.standardized ? numberLineSVG(z, {min:-2.5,max:2.5,markers:[{v:0,label:"0",type:"mean"}]}) : ""}
-            </div>`;
-          el.querySelector("#stdBtn").onclick=()=>{ d.standardized=true; renderSimStep(); };
+          const z=vals.map(v=>round2((v-mean)/std));
+          const panels={
+            selcol:{title:"Select Columns", body:`
+              <div class="oc-fact"><b>Features(표준화할 속성)</b>: Sleep Duration, Quality of Sleep, Physical Activity Level, Stress Level, Daily Steps<br><b>Ignored(그대로 둘 속성)</b>: Person ID, Gender, Age, Occupation, Sleep Disorder, outlier</div>`},
+            preprocess:{title:"Preprocess — Normalize Features", body:`
+              <div class="oc-radio-list"><div class="oc-radio selected"><div><b>Standardize</b><div class="odesc">평균 0, 표준편차 1로 변환해요.</div></div></div></div>
+              <div class="oc-fact">${ocTag("real")}<br>표준화 후 각 속성값은 평균 0을 중심으로 재배치되고, 서로 다른 단위(예: 시간, 걸음 수)의 속성도 같은 척도로 비교할 수 있게 돼요.</div>`},
+            dtable5:{title:"Data Table — 표준화 결과(예시: Stress Level)", body:`
+              <table class="datatbl"><tr><th>원본</th>${vals.map(v=>`<td>${v}</td>`).join("")}</tr><tr><th>표준화(z)</th>${z.map(v=>`<td>${v}</td>`).join("")}</tr></table>
+              <div class="oc-fact">${ocTag("demo")} 평균 <b>${mean}</b>, 표준편차 <b>${std}</b>인 예시 데이터로 표준화를 체험해 봤어요. z = (x − 평균) ÷ 표준편차</div>`},
+          };
+          renderOcStep(el,d,"o5",groups,panels,"Select Columns → Preprocess → Data Table 순서로 위젯을 눌러 보세요.");
         }
       },
-      { title:"⑤ 정리하기", guide:"이번 시뮬레이션에서 수행한 전처리 과정을 정리해 보세요.",
-        render(el, d){
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>✅ 전처리 요약</h4>
-              <div class="note reveal">
-                1) 결측치는 <b>평균값</b>으로 대체했어요.<br>
-                2) 사분위수 범위(IQR)를 이용해 <b>130</b>을 이상치로 판별했어요.<br>
-                3) 이상치를 제거하면 평균과 분산의 왜곡이 줄어드는 것을 확인했어요.<br>
-                4) 표준화(Z-score)를 통해 서로 다른 단위의 속성값을 평균 0, 표준편차 1 기준으로 비교할 수 있게 만들었어요.<br><br>
-                이러한 결측치 처리 → 이상치 처리 → 표준화 순서는 실제 오렌지 프로그램 실습(78~81쪽)에서도 동일하게 적용돼요.
-              </div>
-            </div>`;
+      { title:"⑥ 시각화하기 (Merge Data → Scatter Plot / Box Plot)",
+        guide:"표준화한 수면 데이터를 건강 데이터와 통합한 뒤, 산점도와 박스 플롯으로 시각화해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"merge",icon:"🔀",label:"Merge Data",cat:"transform",badge:"➊"}}, {branch:[ {id:"scatter",icon:"⚬",label:"Scatter Plot",cat:"visualize",badge:"➋"}, {id:"boxplot2",icon:"📦",label:"Box Plot",cat:"visualize",badge:"➌"} ]} ];
+          const xs=[9,8,7,7,6,6,5,4,4,3], ys=[3,4,4,5,6,6,7,8,7,9];
+          const panels={
+            merge:{title:"Merge Data", body:`<div class="oc-fact">${ocTag("real")}<br>표준화까지 마친 'Sleep_clean.csv'와 'Health.csv'를 <b>Person ID</b> 기준으로 통합해요.</div>`},
+            scatter:{title:"Scatter Plot — x: Quality of Sleep, y: Stress Level", body:`
+              ${scatterSVG(xs,ys,{xLabel:"Quality of Sleep",yLabel:"Stress Level"})}
+              <div class="oc-fact">${ocTag("real")}<br>수면의 질이 좋을수록 스트레스 수준이 감소해요. 두 속성은 <b>음의 상관관계</b>를 보여요.</div>`},
+            boxplot2:{title:"Box Plot — Variable: Quality of Sleep, Subgroups: BMI Category", body:`
+              ${boxPlotSVG({min:3,q1:5,median:6,q3:7,max:8},{min:2,max:9,title:"비만"})}
+              ${boxPlotSVG({min:5,q1:6,median:7,q3:7.5,max:9},{min:2,max:9,title:"과체중"})}
+              ${boxPlotSVG({min:6,q1:7,median:8,q3:8.5,max:10},{min:2,max:9,title:"정상"})}
+              <div class="oc-fact">${ocTag("real")}<br>체질량 지수(BMI) 그룹(비만·과체중·정상)에 따라 수면의 질 분포가 뚜렷하게 달라요.</div>`},
+          };
+          renderOcStep(el,d,"o6",groups,panels,"Merge Data를 먼저 누른 뒤, Scatter Plot과 Box Plot도 각각 눌러 보세요.");
         }
       },
-    ]
-  },
-  {
-    id:"stat-sim", type:"sim", icon:"📐", title:"대푯값·산포도 비교 시뮬레이션",
-    ref:"2. 데이터 분석 · 데이터 속성별 특징",
-    desc:"평균·중앙값·최빈값과 분산·표준편차·사분위수 범위를 직접 조작하며 비교해요.",
-    steps:[
-      { title:"① 평균 vs 중앙값 — 이상치의 영향", guide:"B그룹의 1일 SNS 사용 시간(분) 데이터예요. 이상치(200분)를 포함하거나 제외하며 평균과 중앙값이 어떻게 달라지는지 확인해 보세요.",
-        render(el, d){
-          if(d.includeOutlier===undefined) d.includeOutlier=true;
-          const base=[30,30,31,31,31,32,32,33];
-          const vals = d.includeOutlier ? [...base,200] : base;
-          const mean=round2(computeMean(vals)), median=computeMedian(vals);
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>B그룹 1일 SNS 앱 사용 시간(분)</h4>
-              <div class="togglerow ${d.includeOutlier?'on':''}" id="toggleOutlier"><div class="switch"></div>이상치(200분) 포함하기</div>
-              ${numberLineSVG(vals, {min:20,max:210, markers:[{v:mean,label:"평균 "+mean,type:"mean"},{v:median,label:"중앙값 "+median,type:"median"}]})}
-              <div class="legend"><span><i style="background:var(--accent-2)"></i>평균</span><span><i style="background:var(--good)"></i>중앙값</span></div>
-              <div class="note">${d.includeOutlier ? "이상치(200)가 포함되면 평균이 중앙값보다 훨씬 커져요. 평균은 극단값에 민감해요." : "이상치를 제외하면 평균과 중앙값이 비슷해져요. 중앙값은 극단값의 영향을 적게 받아요."}</div>
-            </div>`;
-          el.querySelector("#toggleOutlier").onclick=()=>{ d.includeOutlier=!d.includeOutlier; renderSimStep(); };
-        }
-      },
-      { title:"② 최빈값 — 범주형 데이터", guide:"A그룹과 B그룹의 희망 진로 조사 결과예요. 그룹을 선택해 최빈값(가장 많이 나온 값)을 확인해 보세요.",
-        render(el, d){
-          if(d.group===undefined) d.group="A";
-          const counts = { A:{"인문사회":2,"이학공학":6,"예술체육":1}, B:{"인문사회":5,"이학공학":1,"예술체육":3} };
-          const c = counts[d.group];
-          const mode = computeMode(c);
-          const items = Object.entries(c).map(([label,value])=>({label,value,max: mode.labels.includes(label)}));
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>희망 진로 조사 결과 (${d.group}그룹)</h4>
-              <div class="presetrow">
-                <button class="presetbtn ${d.group==='A'?'active':''}" id="btnA">A그룹</button>
-                <button class="presetbtn ${d.group==='B'?'active':''}" id="btnB">B그룹</button>
-              </div>
-              ${barChartSVG(items)}
-              <div class="note">${d.group}그룹의 최빈값은 <b>${mode.labels.join(", ")}</b>이에요 (${mode.max}명으로 가장 많음). 범주형 데이터는 평균을 구할 수 없어 최빈값을 대푯값으로 사용해요.</div>
-            </div>`;
-          el.querySelector("#btnA").onclick=()=>{ d.group="A"; renderSimStep(); };
-          el.querySelector("#btnB").onclick=()=>{ d.group="B"; renderSimStep(); };
-        }
-      },
-      { title:"③ 분산과 표준편차 계산기", guide:"버튼을 눌러 편차 → 편차 제곱 → 분산 → 표준편차 순서로 계산 과정을 단계별로 살펴보세요.",
-        render(el, d){
-          if(d.varStage===undefined) d.varStage=0;
-          const vals=[4,6,5,7,3];
-          const mean=computeMean(vals);
-          const devs=vals.map(v=>v-mean);
-          const sq=devs.map(v=>v*v);
-          const variance=round2(computeMean(sq));
-          const std=round2(Math.sqrt(variance));
-          const stageLabels=["평균 구하기","편차 구하기 (값-평균)","편차 제곱하기","분산 = 편차 제곱의 평균","표준편차 = 분산의 제곱근"];
-          let chart;
-          if(d.varStage<=1) chart = devBarSVG(d.varStage===0? vals.map(()=>0) : devs);
-          else chart = devBarSVG(sq.map(v=>v));
-          let explainLine="";
-          if(d.varStage===0) explainLine = `평균 = (${vals.join("+")}) ÷ ${vals.length} = <b>${mean}</b>`;
-          else if(d.varStage===1) explainLine = `편차 = 각 값 − 평균 → [${devs.map(round2).join(", ")}]`;
-          else if(d.varStage===2) explainLine = `편차 제곱 → [${sq.map(round2).join(", ")}]`;
-          else if(d.varStage===3) explainLine = `분산 = 편차 제곱의 평균 = (${sq.map(round2).join("+")}) ÷ ${sq.length} = <b>${variance}</b>`;
-          else explainLine = `표준편차 = √분산 = √${variance} = <b>${std}</b>`;
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>예시 데이터: [${vals.join(", ")}]</h4>
-              <div class="presetrow">${stageLabels.map((l,i)=>`<button class="presetbtn ${d.varStage===i?'active':''}" data-i="${i}">${i+1}. ${l}</button>`).join("")}</div>
-              ${chart}
-              <div class="calcbox">${explainLine}</div>
-            </div>`;
-          el.querySelectorAll(".presetbtn").forEach(b=>{ b.onclick=()=>{ d.varStage=Number(b.dataset.i); renderSimStep(); }; });
-        }
-      },
-      { title:"④ 사분위수 범위(IQR)와 박스 플롯 비교", guide:"A반과 B반의 시험 점수 박스 플롯을 비교해, 사분위수 범위(IQR)가 넓을수록 점수가 더 넓게 흩어져 있음을 확인해 보세요.",
-        render(el, d){
-          const A={min:50,q1:65,median:75,q3:85,max:95};
-          const B={min:30,q1:55,median:70,q3:95,max:100};
-          const iqrA=A.q3-A.q1, iqrB=B.q3-B.q1;
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>A반 시험 점수 (IQR = ${iqrA}점)</h4>
-              ${boxPlotSVG(A,{min:20,max:110})}
-              <h4 style="margin-top:16px">B반 시험 점수 (IQR = ${iqrB}점)</h4>
-              ${boxPlotSVG(B,{min:20,max:110})}
-              <div class="note">A반은 사분위수 범위(IQR)가 ${iqrA}점으로 좁아 점수가 고르게 분포되어 있고, B반은 IQR이 ${iqrB}점으로 넓어 점수 차이(산포도)가 더 커요.</div>
-            </div>`;
-        }
-      },
-      { title:"⑤ 정리하기", guide:"대푯값과 산포도 학습 내용을 정리해 보세요.", render(el,d){
-          el.innerHTML = `<div class="sim-card"><h4>✅ 정리</h4><div class="note reveal">
-            대푯값(평균·중앙값·최빈값)은 데이터 전체 특징을 하나의 값으로 나타내고,<br>
-            산포도(분산·표준편차·사분위수 범위)는 데이터가 대푯값에서 얼마나 흩어져 있는지 나타내요.<br><br>
-            이상치가 있을 때는 평균보다 <b>중앙값</b>이, 범주형 데이터에는 <b>최빈값</b>이 더 적절한 대푯값이 될 수 있어요.
+      { title:"⑦ 정리하기", guide:"이번 시뮬레이션에서 수행한 오렌지 프로그램 실습 과정을 정리해 보세요.",
+        render(el,d){
+          el.innerHTML = `<div class="sim-card"><h4>✅ 실습 요약 (78~82쪽)</h4><div class="note reveal">
+            File → <b>Data Table / Feature Statistics</b>로 데이터를 살펴보고,<br>
+            <b>Impute</b>로 결측치를 평균값(7.132)으로 대체했어요.<br>
+            <b>Box Plot</b>으로 이상치 판별 기준(하한 0, 상한 120)을 구하고, <b>Formula → Select Rows</b>로 이상치를 제외했어요.<br>
+            <b>Preprocess(Standardize)</b>로 속성을 표준화하고, <b>Merge Data → Scatter Plot / Box Plot</b>으로 시각화까지 마쳤어요.<br><br>
+            이 순서는 실제 오렌지 프로그램 실습(78~82쪽)에서 위젯을 연결하는 순서와 동일해요.
           </div></div>`;
         }
       },
     ]
   },
   {
-    id:"corr-sim", type:"sim", icon:"🔗", title:"상관관계 탐색 시뮬레이션",
-    ref:"2. 데이터 분석 · 속성 간의 관계",
-    desc:"산점도와 상관계수를 직접 조작해 상관관계의 방향과 강도, 인과관계와의 차이를 체험해요.",
+    id:"stat-sim", type:"sim", icon:"💼", title:"직업별 스트레스 분석 시뮬레이션 (오렌지 프로그램)",
+    ref:"2. 데이터 분석 · 데이터 속성별 특징 실습 (92~98쪽)",
+    desc:"Group by, Select Rows, Bar Plot, Box Plot, Correlations 위젯을 눌러가며 직업별 스트레스 수준의 대푯값·산포도·상관관계를 분석해요.",
     steps:[
-      { title:"① 산점도로 상관관계 살펴보기", guide:"네 가지 유형의 산점도를 눌러보며 상관계수(r)가 어떻게 달라지는지 확인해 보세요.",
-        render(el, d){
-          if(d.pattern===undefined) d.pattern="pos";
-          const xs=[1,2,3,4,5,6,7,8,9,10];
-          const sets={
-            pos:[2,3,3,5,6,6,8,8,9,10],
-            neg:[10,9,8,7,7,6,5,4,3,2],
-            none:[5,8,3,7,2,9,4,6,1,10],
-            weak:[3,6,4,7,5,9,6,8,7,10],
+      { title:"① 직업별 데이터 개수 확인하기 (Group by)",
+        guide:"Group by 위젯으로 직업(Occupation)별 데이터 개수를 확인해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"file",icon:"📁",label:"File",cat:"data"}}, {node:{id:"groupby1",icon:"Σ",label:"Group by",cat:"transform",badge:"➊"}}, {node:{id:"dtable1",icon:"📋",label:"Data Table",cat:"data",badge:"➋"}} ];
+          const items=[{label:"Nurse",value:150},{label:"Doctor",value:55},{label:"Engineer",value:45},{label:"Lawyer",value:35},{label:"Accountant",value:30},{label:"Teacher",value:28},{label:"Sales",value:25},{label:"Manager",value:2},{label:"SalesRep",value:1},{label:"Scientist",value:2},{label:"SW Eng.",value:1}];
+          const panels={
+            file:{title:"File — Sleep_Health_merge.csv", body:`<div class="oc-fact">${ocTag("real")}<br>수면 데이터와 건강 데이터를 통합한 파일이에요.</div>`},
+            groupby1:{title:"Group by — Occupation / Count(Person ID)", body:`<div class="oc-fact">Group by: <b>Occupation</b>, Aggregation: <b>Count</b>(Person ID)</div>`},
+            dtable1:{title:"Data Table — 직업별 데이터 개수", body:`${barChartSVG(items)}<div class="oc-fact">${ocTag("demo")} ${ocTag("real")}<br>11개 직업 중 <b>Manager, Sales Representative, Scientist, Software Engineer</b>는 1~4개로 데이터 개수가 적어요.</div>`},
           };
-          const labels={pos:"강한 양의 상관",neg:"강한 음의 상관",none:"상관관계 없음",weak:"약한 상관"};
-          const ys=sets[d.pattern];
-          const r=round2(computeCorrelation(xs,ys));
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>산점도 유형 선택</h4>
-              <div class="presetrow">${Object.keys(sets).map(k=>`<button class="presetbtn ${d.pattern===k?'active':''}" data-k="${k}">${labels[k]}</button>`).join("")}</div>
-              ${scatterSVG(xs,ys,{xLabel:"속성 X",yLabel:"속성 Y"})}
-              <div class="calcbox">상관계수 r ≈ <b>${r}</b> → ${corrLabel(r)}</div>
-            </div>`;
-          el.querySelectorAll(".presetbtn").forEach(b=>{ b.onclick=()=>{ d.pattern=b.dataset.k; renderSimStep(); }; });
+          renderOcStep(el,d,"o1",groups,panels,"File → Group by → Data Table 순서로 위젯을 눌러 보세요.");
         }
       },
-      { title:"② 상관계수 계산해 보기", guide:"스트레스 수준과 수면의 질 5개 데이터로 상관계수를 계산하는 과정을 단계별로 확인해 보세요.",
-        render(el, d){
-          if(d.corrStage===undefined) d.corrStage=0;
-          const xs=[8,6,7,4,5], ys=[3,5,4,7,6];
-          const mx=computeMean(xs), my=computeMean(ys);
-          const dxs=xs.map(x=>round2(x-mx)), dys=ys.map(y=>round2(y-my));
-          const prods=xs.map((x,i)=>round2(dxs[i]*dys[i]));
-          const r=round2(computeCorrelation(xs,ys));
-          const rowsX=xs.map(v=>`<td>${v}</td>`).join("");
-          const rowsY=ys.map(v=>`<td>${v}</td>`).join("");
-          const rowsDX = d.corrStage>=1 ? dxs.map(v=>`<td>${v}</td>`).join("") : xs.map(()=>`<td>—</td>`).join("");
-          const rowsDY = d.corrStage>=1 ? dys.map(v=>`<td>${v}</td>`).join("") : xs.map(()=>`<td>—</td>`).join("");
-          const rowsP = d.corrStage>=2 ? prods.map(v=>`<td>${v}</td>`).join("") : xs.map(()=>`<td>—</td>`).join("");
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>스트레스 수준(X)과 수면의 질(Y)</h4>
-              <table class="datatbl">
-                <tr><th>스트레스(X)</th>${rowsX}</tr>
-                <tr><th>수면의 질(Y)</th>${rowsY}</tr>
-                <tr><th>편차 dx</th>${rowsDX}</tr>
-                <tr><th>편차 dy</th>${rowsDY}</tr>
-                <tr><th>dx × dy</th>${rowsP}</tr>
-              </table>
-              <div class="presetrow" style="margin-top:12px">
-                <button class="presetbtn ${d.corrStage===0?'active':''}" id="s0">① 평균 구하기</button>
-                <button class="presetbtn ${d.corrStage===1?'active':''}" id="s1">② 편차 구하기</button>
-                <button class="presetbtn ${d.corrStage===2?'active':''}" id="s2">③ 편차 곱하기</button>
-                <button class="presetbtn ${d.corrStage===3?'active':''}" id="s3">④ 상관계수 계산</button>
-              </div>
-              <div class="calcbox">${
-                d.corrStage===0 ? `평균 X = ${round2(mx)}, 평균 Y = ${round2(my)}` :
-                d.corrStage===1 ? `편차 dx = X − 평균X, dy = Y − 평균Y` :
-                d.corrStage===2 ? `dx × dy를 각각 곱해요. 합 = ${round2(sum(prods))}` :
-                `r = Σ(dx·dy) ÷ √(Σdx²·Σdy²) = <b>${r}</b> → ${corrLabel(r)}`
-              }</div>
-            </div>`;
-          ["s0","s1","s2","s3"].forEach((id,i)=>{ el.querySelector("#"+id).onclick=()=>{ d.corrStage=i; renderSimStep(); }; });
+      { title:"② 데이터 필터링하기 (Select Rows)",
+        guide:"데이터 개수가 적은 직업을 제외하는 조건을 설정해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"file2",icon:"📁",label:"File",cat:"data"}}, {node:{id:"selrows",icon:"🔎",label:"Select Rows",cat:"transform",badge:"➊"}} ];
+          const panels={
+            selrows:{title:"Select Rows — Add Condition", body:`
+              <div class="calcbox">Occupation <b>is not</b> (Manager, Sales Representative, Scientist, Software Engineer)</div>
+              <div class="oc-fact">${ocTag("real")}<br>데이터 개수가 적어 해당 직업의 특징을 파악하기 어려운 데이터는 분석에서 제외해요.</div>`},
+          };
+          renderOcStep(el,d,"o2",groups,panels,"Select Rows 위젯을 눌러 제외 조건을 확인해 보세요.");
         }
       },
-      { title:"③ 상관관계 vs 인과관계", guide:"선풍기 판매량과 아이스크림 판매량은 양의 상관관계를 보여요. 선풍기 판매가 늘어난 것이 아이스크림 판매 증가의 '원인'일까요?",
-        render(el, d){
-          if(d.guessed===undefined) d.guessed=null;
-          const xs=[1,2,3,4,5,6,7,8], ys=[2,3,4,5,6,7,7,9];
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>선풍기 판매량(X) vs 아이스크림 판매량(Y)</h4>
-              ${scatterSVG(xs,ys,{xLabel:"선풍기 판매량",yLabel:"아이스크림 판매량"})}
+      { title:"③ 대푯값 비교하기 (Group by → Bar Plot)",
+        guide:"평균과 중앙값을 각각 Bar Plot으로 시각화해 비교해 보세요.",
+        render(el,d){
+          if(d.gm===undefined) d.gm="mean";
+          const groups=[ {node:{id:"groupby2",icon:"Σ",label:"Group by",cat:"transform",badge:"➊"}}, {node:{id:"bar1",icon:"📶",label:"Bar Plot",cat:"visualize",badge:"➋"}} ];
+          const meanVals=[{label:"Doctor",value:7.8},{label:"Sales",value:7.6},{label:"Nurse",value:6.0},{label:"Lawyer",value:5.9},{label:"Teacher",value:4.5},{label:"Engineer",value:4.6},{label:"Accountant",value:4.4}];
+          const medianVals=[{label:"Doctor",value:6.1},{label:"Sales",value:7.4},{label:"Nurse",value:7.5},{label:"Lawyer",value:5.8},{label:"Teacher",value:4.4},{label:"Engineer",value:4.5},{label:"Accountant",value:4.3}];
+          const items = d.gm==="mean" ? meanVals : medianVals;
+          const panels={
+            bar1:{title:`Bar Plot — 직업별 Stress Level (${d.gm==="mean"?"평균":"중앙값"})`, body:`
+              <div class="presetrow"><button class="presetbtn ${d.gm==='mean'?'active':''}" data-v="mean">평균으로 보기</button><button class="presetbtn ${d.gm==='median'?'active':''}" data-v="median">중앙값으로 보기</button></div>
+              ${barChartSVG(items)}
+              <div class="oc-fact">${ocTag("demo")} ${ocTag("real")}<br>${d.gm==="mean" ? "의사, 영업 사원의 스트레스 수준이 높고, 회계사·엔지니어·교사는 낮으며, 변호사나 간호사는 평균과 비슷해요." : "의사는 평균으로 보면 높지만 중앙값으로 보면 전체 평균과 비슷해요. 반대로 간호사는 평균으로 보면 평균과 비슷하지만 중앙값으로 보면 높게 나타나요."}</div>`},
+          };
+          const html = ocCanvasHTML(groups, d.o3, "Group by → Bar Plot 순서로 눌러 보세요. Bar Plot 안에서 평균/중앙값을 바꿔볼 수 있어요.");
+          el.innerHTML = html + (d.o3 && panels[d.o3] ? ocWindow(panels[d.o3].title, panels[d.o3].body) : ocPlaceholder());
+          bindOcNodes(el, id=>{ d.o3=id; renderSimStep(); });
+          const presets = el.querySelectorAll(".presetbtn");
+          presets.forEach(b=>{ b.onclick=(e)=>{ e.stopPropagation(); d.gm=b.dataset.v; renderSimStep(); }; });
+        }
+      },
+      { title:"④ 산포도로 비교하기 (Box Plot)",
+        guide:"Box Plot으로 직업별 스트레스 수준의 산포도(퍼진 정도)를 비교해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"boxplot",icon:"📦",label:"Box Plot",cat:"visualize",badge:"➊"}} ];
+          const panels={
+            boxplot:{title:"Box Plot — Variable: Stress Level, Subgroups: Occupation", body:`
+              ${boxPlotSVG({min:2,q1:4,median:7,q3:9,max:10},{min:1,max:11,title:"간호사(Nurse)"})}
+              ${boxPlotSVG({min:5,q1:5.5,median:6,q3:6.5,max:7},{min:1,max:11,title:"변호사(Lawyer)"})}
+              ${boxPlotSVG({min:6.5,q1:7,median:7.5,q3:8,max:8.5},{min:1,max:11,title:"영업 사원(Sales)"})}
+              <div class="oc-fact">${ocTag("demo")} ${ocTag("real")}<br>간호사는 제1사분위수와 제3사분위수 사이가 넓어 같은 직업 내에서도 스트레스 정도가 다양해요. 변호사와 영업 사원은 폭이 매우 좁아 직업 내 스트레스 수준이 거의 비슷해요.</div>`},
+          };
+          renderOcStep(el,d,"o4",groups,panels,"Box Plot 위젯을 눌러 직업별 산포도를 비교해 보세요.");
+        }
+      },
+      { title:"⑤ 상관관계 분석하기 (Correlations)",
+        guide:"전체 데이터와 간호사·회계사 데이터 각각에서 Correlations 위젯으로 상관관계를 확인해 보세요.",
+        render(el,d){
+          if(d.corrTab===undefined) d.corrTab="all";
+          const groups=[ {node:{id:"corr",icon:"🔗",label:"Correlations",cat:"unsup",badge:"➊"}} ];
+          const msg={
+            all:"심박수는 <b>양의 상관관계</b>, 수면의 질·수면 시간은 <b>음의 상관관계</b>, 신체 활동 수준·일일 걸음 수는 <b>상관관계 없음</b>으로 나타나요.",
+            nurse:"간호사의 스트레스 수준과 일일 걸음 수 사이에는 <b>양의 상관관계</b>가 있어요. 신체 활동이 많은 간호사는 활동량이 늘수록 스트레스가 높아지는 경향이 있어요.",
+            accountant:"회계사의 스트레스 수준과 일일 걸음 수 사이에는 <b>음의 상관관계</b>가 있어요. 주로 앉아서 일하는 회계사는 활동량이 늘수록 오히려 스트레스가 감소하는 경향이 있어요.",
+          };
+          const panels={
+            corr:{title:"Correlations — Pearson correlation", body:`
               <div class="presetrow">
-                <button class="presetbtn ${d.guessed==='yes'?'active':''}" id="yesBtn">선풍기 판매가 원인이다</button>
-                <button class="presetbtn ${d.guessed==='no'?'active':''}" id="noBtn">원인이라 보기 어렵다</button>
+                <button class="presetbtn ${d.corrTab==='all'?'active':''}" data-v="all">전체 데이터</button>
+                <button class="presetbtn ${d.corrTab==='nurse'?'active':''}" data-v="nurse">간호사만 (Select Rows)</button>
+                <button class="presetbtn ${d.corrTab==='accountant'?'active':''}" data-v="accountant">회계사만 (Select Rows)</button>
               </div>
-              ${d.guessed ? `<div class="note reveal">정답은 <b>'원인이라 보기 어렵다'</b>예요. 선풍기와 아이스크림 판매량 사이에는 양의 상관관계가 있지만, 실제 원인은 '더운 날씨'라는 제3의 요인이에요. 이처럼 상관관계가 있다고 해서 반드시 인과관계가 있는 것은 아니에요.</div>` : ""}
-            </div>`;
-          el.querySelector("#yesBtn").onclick=()=>{ d.guessed="yes"; renderSimStep(); };
-          el.querySelector("#noBtn").onclick=()=>{ d.guessed="no"; renderSimStep(); };
+              <div class="oc-fact">${ocTag("real")}<br>${msg[d.corrTab]}</div>`},
+          };
+          const html = ocCanvasHTML(groups, "corr", "Correlations 위젯을 눌러 대상을 바꿔가며 상관관계를 비교해 보세요.");
+          el.innerHTML = html + ocWindow(panels.corr.title, panels.corr.body);
+          bindOcNodes(el, ()=>{ renderSimStep(); });
+          el.querySelectorAll(".presetbtn").forEach(b=>{ b.onclick=()=>{ d.corrTab=b.dataset.v; renderSimStep(); }; });
         }
       },
-      { title:"④ 상관계수 해석 시 주의할 점", guide:"두 산점도 모두 상관계수가 0에 가깝지만, 실제 관계는 서로 달라요. 상관계수는 '선형' 관계만 측정한다는 점에 유의해야 해요.",
-        render(el, d){
-          const xs=[-3,-2,-1,0,1,2,3];
-          const yA=[1,-2,3,-1,2,-3,0];
-          const yB=[9,4,1,0,1,4,9];
-          const rA=round2(computeCorrelation(xs,yA));
-          const rB=round2(computeCorrelation(xs,yB));
-          el.innerHTML = `
-            <div class="sim-card">
-              <h4>산점도 A (특별한 패턴 없음)</h4>
-              ${scatterSVG(xs,yA,{xmin:-4,xmax:4,ymin:-4,ymax:4})}
-              <div class="calcbox">상관계수 r ≈ <b>${rA}</b></div>
-              <h4 style="margin-top:18px">산점도 B (U자 형태의 뚜렷한 패턴)</h4>
-              ${scatterSVG(xs,yB,{xmin:-4,xmax:4,ymin:-2,ymax:10})}
-              <div class="calcbox">상관계수 r ≈ <b>${rB}</b></div>
-              <div class="note">두 산점도 모두 상관계수가 0에 가깝지만, B는 뚜렷한 U자형 패턴이 있어요. 상관계수는 <b>선형 관계</b>만 측정하므로, 산점도를 함께 확인해 비선형 관계를 놓치지 않아야 해요.</div>
-            </div>`;
+      { title:"⑥ 정리하기", guide:"이번 시뮬레이션에서 수행한 오렌지 프로그램 실습 과정을 정리해 보세요.",
+        render(el,d){
+          el.innerHTML = `<div class="sim-card"><h4>✅ 실습 요약 (92~98쪽)</h4><div class="note reveal">
+            <b>Group by</b>로 직업별 데이터 개수를 확인하고, <b>Select Rows</b>로 데이터가 적은 직업을 제외했어요.<br>
+            평균과 중앙값을 각각 <b>Bar Plot</b>으로 비교해 대푯값에 따라 해석이 달라질 수 있음을 확인했어요.<br>
+            <b>Box Plot</b>으로 직업별 산포도를 비교하고, <b>Correlations</b>로 전체 및 직업별 상관관계를 분석했어요.<br><br>
+            이 순서는 실제 오렌지 프로그램 실습(92~98쪽)에서 위젯을 연결하는 순서와 동일해요.
+          </div></div>`;
         }
       },
-      { title:"⑤ 정리하기", guide:"상관관계 탐색 학습 내용을 정리해 보세요.", render(el,d){
-          el.innerHTML = `<div class="sim-card"><h4>✅ 정리</h4><div class="note reveal">
-            상관계수(r)는 -1~1 사이의 값으로 두 속성 간 선형 관계의 방향과 강도를 나타내요.<br>
-            r이 1에 가까우면 강한 양의 상관, -1에 가까우면 강한 음의 상관, 0에 가까우면 상관관계가 약해요.<br><br>
-            상관관계가 있다고 해서 반드시 인과관계가 있는 것은 아니며, 상관계수만으로는 비선형 관계를 파악하기 어려우므로 산점도를 함께 확인하는 것이 중요해요.
+    ]
+  },
+  {
+    id:"corr-sim", type:"sim", icon:"✈️", title:"여행지 데이터 분석 시뮬레이션 (오렌지 프로그램)",
+    ref:"2. 데이터 분석 · 데이터 분석의 실제 실습 (104~113쪽)",
+    desc:"숙소 정보와 생활비 데이터를 불러와 Formula, Box Plot, Merge Data, Scatter Plot, Correlations, Heat Map 위젯으로 유럽 여행지를 분석해요.",
+    steps:[
+      { title:"① 숙소 데이터 속성 파악하기 (File → Data Table / Feature Statistics)",
+        guide:"File 위젯으로 유럽 도시별 숙소 정보를 불러왔어요. 위젯을 눌러 데이터를 확인해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"file",icon:"📁",label:"File",cat:"data",badge:"➊"}}, {branch:[ {id:"dtable",icon:"📋",label:"Data Table",cat:"data",badge:"➋"}, {id:"fstat",icon:"📊",label:"Feature Statistics",cat:"data",badge:"➌"} ]} ];
+          const panels={
+            file:{title:"File — airbnb_european-cities.csv", body:`<div class="oc-fact">${ocTag("real")}<br>유럽 도시별 숙소 정보와 고객 평가 데이터예요.</div>`},
+            dtable:{title:"Data Table — 숙소 정보", body:`
+              <table class="datatbl"><tr><th>city</th><th>room_type</th><th>realSum</th><th>person_capacity</th><th>cleanliness_rating</th></tr>
+              <tr><td>Amsterdam</td><td>Private room</td><td>194.0</td><td>2</td><td>10</td></tr>
+              <tr><td>Athens</td><td>Entire home</td><td>82.5</td><td>4</td><td>9</td></tr>
+              <tr><td>London</td><td>Private room</td><td>310.2</td><td>3</td><td>8</td></tr></table>`},
+            fstat:{title:"Feature Statistics — 숙소 정보", body:`
+              <div class="oc-fact">${ocTag("real")}<br><b>51,707개</b>의 데이터 행, <b>15개</b>의 속성, 결측치는 없어요. 숙박 인원(person_capacity)은 최소·최빈값이 모두 <b>2인실</b>이에요. 총 숙박비·침실 수·도심 거리·지하철 거리는 평균보다 중앙값이 낮고, 청결도·고객 만족도는 중앙값과 최댓값이 비슷해 매우 높은 수준이에요.</div>`},
+          };
+          renderOcStep(el,d,"o1",groups,panels,"File 위젯을 누른 뒤, Data Table과 Feature Statistics도 각각 눌러보세요.");
+        }
+      },
+      { title:"② 1인당 숙박비 구하기 (Formula 위젯)",
+        guide:"Formula 위젯으로 총 숙박비를 숙박 가능 인원으로 나눈 새로운 속성을 만들어 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"formula",icon:"ƒ",label:"Formula",cat:"transform",badge:"➊"}}, {node:{id:"dtable2",icon:"📋",label:"Data Table",cat:"data",badge:"➋"}} ];
+          const panels={
+            formula:{title:"Formula — New → Numeric", body:`<div class="calcbox">charge = realSum / person_capacity</div><div class="oc-fact">${ocTag("real")}<br>1인당 숙박비를 나타내는 새로운 속성 'charge'가 생성돼요.</div>`},
+            dtable2:{title:"Data Table — charge 속성", body:`<div class="oc-fact">${ocTag("real")}<br>1인당 숙박비는 최소 <b>8.8515</b>, 최대 <b>9272.73</b>으로 확인돼요.</div>`},
+          };
+          renderOcStep(el,d,"o2",groups,panels,"Formula 위젯을 눌러 계산식을 확인하고, Data Table에서 결과를 확인해 보세요.");
+        }
+      },
+      { title:"③ 도시별 분포 시각화하기 (Box Plot ×2)",
+        guide:"도시별 공유 숙박 데이터 개수와 숙박 인원 분포를 각각 Box Plot으로 확인해 보세요.",
+        render(el,d){
+          const groups=[ {branch:[ {id:"box1",icon:"📦",label:"Box Plot (데이터 개수)",cat:"visualize",badge:"➊"}, {id:"box2",icon:"📦",label:"Box Plot (숙박 인원)",cat:"visualize",badge:"➋"} ]} ];
+          const panels={
+            box1:{title:"Box Plot — Variable/Subgroups: city (데이터 개수)", body:`${barChartSVG([{label:"London",value:9700,max:true},{label:"Rome",value:9200,max:true},{label:"Paris",value:6700},{label:"Amsterdam",value:2200},{label:"Barcelona",value:2000},{label:"Berlin",value:1900}])}<div class="oc-fact">${ocTag("demo")} ${ocTag("real")}<br>런던과 로마에 공유 숙박이 활성화(값이 큼)되어 있고, 암스테르담·바르셀로나·베를린에는 상대적으로 적어요.</div>`},
+            box2:{title:"Box Plot — Variable: person_capacity, Subgroups: city", body:`${boxPlotSVG({min:1,q1:2,median:2,q3:3,max:4},{min:0,max:6,title:"Barcelona/Berlin"})}${boxPlotSVG({min:2,q1:3,median:3,q3:4,max:6},{min:0,max:6,title:"Athens"})}<div class="oc-fact">${ocTag("demo")} ${ocTag("real")}<br>2~4인실이 일반적인데, 바르셀로나·베를린은 2~3인실이 많고, 아테네는 3~4인실이 많아요.</div>`},
+          };
+          renderOcStep(el,d,"o3",groups,panels,"두 Box Plot 위젯을 각각 눌러 도시별 분포를 비교해 보세요.");
+        }
+      },
+      { title:"④ 도시별 대푯값 확인하기 (Group by → Bar Plot)",
+        guide:"도시별 평균값을 Group by로 구하고 Bar Plot으로 시각화해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"groupby",icon:"Σ",label:"Group by (city, mean)",cat:"transform",badge:"➊"}}, {node:{id:"bar",icon:"📶",label:"Bar Plot",cat:"visualize",badge:"➋"}} ];
+          const items=[{label:"Amsterdam",value:220,max:true},{label:"London",value:140},{label:"Paris",value:150},{label:"Rome",value:120},{label:"Barcelona",value:110},{label:"Berlin",value:100},{label:"Athens",value:45},{label:"Budapest",value:40}];
+          const panels={
+            bar:{title:"Bar Plot — 도시별 1인당 숙박비 평균(charge)", body:`${barChartSVG(items)}<div class="oc-fact">${ocTag("demo")} ${ocTag("real")}<br>1인당 숙박비는 암스테르담이 매우 높고, 아테네와 부다페스트가 상대적으로 저렴해요.</div>`},
+          };
+          renderOcStep(el,d,"o4",groups,panels,"Group by → Bar Plot 순서로 눌러 도시별 대푯값을 확인해 보세요.");
+        }
+      },
+      { title:"⑤ 생활비 데이터 살펴보기 (File → Box Plot)",
+        guide:"유럽 도시별 생활비 데이터를 불러와 국가별 생활비 지수를 Box Plot으로 확인해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"file2",icon:"📁",label:"File",cat:"data",badge:"➊"}}, {node:{id:"box3",icon:"📦",label:"Box Plot",cat:"visualize",badge:"➋"}} ];
+          const panels={
+            file2:{title:"File — Europe Cost of Living Index by City 2024.csv", body:`<div class="oc-fact">${ocTag("real")}<br><b>174개</b>의 데이터 행, 총 <b>9개</b>의 속성이 있고 결측치는 없어요.</div>`},
+            box3:{title:"Box Plot — Variable: Cost of Living Index, Subgroups: Country", body:`${boxPlotSVG({min:105,q1:112,median:115,q3:118,max:122},{min:60,max:130,title:"Switzerland"})}<div class="oc-fact">${ocTag("real")}<br>스위스 도시들의 생활비 지수는 평균 <b>115.3</b>, 표준편차 <b>4.29</b>로 매우 높아요.</div>`},
+          };
+          renderOcStep(el,d,"o5",groups,panels,"File 위젯을 누른 뒤, Box Plot도 눌러 국가별 생활비 지수를 확인해 보세요.");
+        }
+      },
+      { title:"⑥ 데이터 통합하기 (Merge 위젯)",
+        guide:"숙소 정보 데이터와 생활비 데이터를 도시(city) 기준으로 통합해 보세요.",
+        render(el,d){
+          const groups=[ {branch:[ {id:"a",icon:"📁",label:"숙소 정보",cat:"data"}, {id:"b",icon:"📁",label:"생활비",cat:"data"} ]}, {node:{id:"merge",icon:"🔀",label:"Merge",cat:"transform",badge:"➊"}} ];
+          const panels={
+            merge:{title:"Merge — Row matching: city ↔ City", body:`<div class="oc-fact">${ocTag("real")}<br>숙소 정보 데이터의 <b>8개</b> 속성과 생활비 데이터의 <b>7개</b> 속성이 합쳐져 총 <b>15개</b> 속성으로 구성된 통합 데이터를 확인할 수 있어요.</div>`},
+          };
+          renderOcStep(el,d,"o6",groups,panels,"Merge 위젯을 눌러 통합 결과를 확인해 보세요.");
+        }
+      },
+      { title:"⑦ 관계 시각화하기 (Scatter Plot / Correlations)",
+        guide:"1인당 숙박비와 생활비 지수의 관계를 산점도와 상관계수로 살펴보세요.",
+        render(el,d){
+          const groups=[ {branch:[ {id:"scatter",icon:"⚬",label:"Scatter Plot",cat:"visualize",badge:"➊"}, {id:"corr",icon:"🔗",label:"Correlations",cat:"unsup",badge:"➋"} ]} ];
+          const xs=[45,40,100,110,120,140,150,220], ys=[65,60,95,100,105,112,115,120];
+          const panels={
+            scatter:{title:"Scatter Plot — x: charge(Mean), y: Cost of Living Index", body:`${scatterSVG(xs,ys,{xLabel:"1인당 숙박비 평균",yLabel:"생활비 지수"})}<div class="oc-fact">${ocTag("demo")} ${ocTag("real")}<br>아테네와 부다페스트는 숙박비와 생활비 지수가 모두 낮고, 런던·파리·암스테르담은 모두 높아요. 왼쪽 아래에서 오른쪽 위로 분포되어 있어 <b>양의 상관관계</b>로 짐작할 수 있어요.</div>`},
+            corr:{title:"Correlations — guest_satisfaction_overall", body:`<div class="oc-fact">${ocTag("real")}<br>고객 만족도는 청결도(cleanliness_rating)·숙박 인원(person_capacity)과 <b>높은 양의 상관관계</b>를, 임대료 지수(Rent Index)·생활비+임대료 지수와는 <b>음의 상관관계</b>를 보여요.</div>`},
+          };
+          renderOcStep(el,d,"o7",groups,panels,"Scatter Plot과 Correlations 위젯을 각각 눌러 속성 간의 관계를 확인해 보세요.");
+        }
+      },
+      { title:"⑧ 정규화 후 히트맵으로 종합 분석하기 (Preprocess → Heat Map)",
+        guide:"단위가 다른 속성값을 0~1로 정규화한 뒤, Heat Map으로 도시별 특징을 한눈에 비교해 보세요.",
+        render(el,d){
+          const groups=[ {node:{id:"preprocess",icon:"⚙️",label:"Preprocess",cat:"transform",badge:"➊"}}, {node:{id:"heatmap",icon:"🌡️",label:"Heat Map",cat:"visualize",badge:"➋"}} ];
+          const cities=["Athens","Budapest","London"];
+          const cols=["청결도","고객만족도","도심거리","1인당숙박비","생활비지수"];
+          const matrix=[[0.9,0.9,0.15,0.15,0.35],[0.6,0.75,0.4,0.15,0.2],[0.25,0.3,0.85,0.9,0.85]];
+          const panels={
+            preprocess:{title:"Preprocess — Normalize to interval [0, 1]", body:`<div class="oc-fact">${ocTag("real")}<br>속성별 단위가 통일되어 있지 않으므로, 모든 수치형 속성을 0~1 범위로 정규화해요.</div>`},
+            heatmap:{title:"Heat Map — Row Annotations: city", body:`${heatMapSVG(cities,cols,matrix)}
+              <div class="legend"><span><i style="background:rgb(37,99,235)"></i>낮음</span><span><i style="background:rgb(220,38,38)"></i>높음</span></div>
+              <div class="oc-fact">${ocTag("real")}<br>
+              • <b>아테네</b>는 청결도와 고객 만족도가 높고 도심과의 거리와 1인당 숙박비가 낮아 적절한 여행지로 판단할 수 있어요.<br>
+              • <b>부다페스트</b>는 생활비 지수와 1인당 숙박비가 낮고 고객 만족도도 높은 편이라 적절한 여행지로 판단할 수 있어요.<br>
+              • <b>런던</b>은 생활비 지수와 도심과의 거리가 높고 청결도와 고객 만족도가 낮아 꼭 가야 할 관광지가 없다면 추천하기 어려워요.</div>`},
+          };
+          renderOcStep(el,d,"o8",groups,panels,"Preprocess로 정규화한 뒤, Heat Map을 눌러 도시별 특징을 비교해 보세요.");
+        }
+      },
+      { title:"⑨ 정리하기", guide:"이번 시뮬레이션에서 수행한 오렌지 프로그램 실습 과정을 정리해 보세요.",
+        render(el,d){
+          el.innerHTML = `<div class="sim-card"><h4>✅ 실습 요약 (104~113쪽)</h4><div class="note reveal">
+            <b>File → Data Table / Feature Statistics</b>로 숙소 데이터를 살펴보고, <b>Formula</b>로 1인당 숙박비(charge)를 계산했어요.<br>
+            <b>Box Plot</b>과 <b>Group by → Bar Plot</b>으로 도시별 분포와 대푯값을 비교했어요.<br>
+            생활비 데이터를 <b>File</b>로 불러와 <b>Merge</b>로 통합하고, <b>Scatter Plot / Correlations</b>로 관계를 분석했어요.<br>
+            마지막으로 <b>Preprocess(정규화) → Heat Map</b>으로 여러 속성을 한눈에 비교해 최적의 여행지를 판단했어요.<br><br>
+            이 순서는 실제 오렌지 프로그램 실습(104~113쪽)에서 위젯을 연결하는 순서와 동일해요.
           </div></div>`;
         }
       },
     ]
   },
 ];
+
+function renderOcStep(el, d, key, groups, panels, hint){
+  const activeId = d[key];
+  const html = ocCanvasHTML(groups, activeId, hint);
+  const panel = activeId && panels[activeId] ? ocWindow(panels[activeId].title, panels[activeId].body) : ocPlaceholder();
+  el.innerHTML = html + panel;
+  bindOcNodes(el, id=>{ d[key]=id; renderSimStep(); });
+}
 
 /* ================= init ================= */
 renderHome();
